@@ -11,7 +11,6 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import javax.swing.plaf.basic.BasicIconFactory;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -73,6 +72,35 @@ public class Model {
         }
 
         return v;
+    }
+
+    /**
+     * Add a constraint node where the logic relation corresponds to (~L1)OR(L2).
+     *
+     * @param l1  skill L1
+     * @param l2 skill L2
+     */
+    void addConstraint(String l1, String l2) {
+        // left < right: (NOT left) OR (right)
+        var L1 = nameToIdx.get(l1);
+        var L2 = nameToIdx.get(l2);
+
+        int D = model.addVariable(2);
+        factors.put(D, BayesianFactorFactory.factory()
+                .domain(model.getDomain(L1, L2, D))
+                .set(1.0, 0, 1, 1) // P(D=1|L1, L2)
+                .set(0.0, 1, 0, 1) // P(D=1|L1, L2)
+                .set(1.0, 0, 1, 1) // P(D=1|L1, L2)
+                .set(1.0, 1, 1, 1) // P(D=1|L1, L2)
+                .set(0.0, 0, 1, 0) // P(D=0|L1, L2)
+                .set(1.0, 1, 0, 0) // P(D=0|L1, L2)
+                .set(0.0, 0, 1, 0) // P(D=0|L1, L2)
+                .set(0.0, 1, 1, 0) // P(D=0|L1, L2)
+                .get()
+        );
+
+        constraints.add(D);
+        model.addParents(D, L1, L2);
     }
 
     /**
@@ -268,6 +296,20 @@ public class Model {
                 }
             }
         }
+
+        // Add relations between skills
+        model.addConstraint("X11", "X12");
+        model.addConstraint("X12", "X13");
+        model.addConstraint("X21", "X22");
+        model.addConstraint("X22", "X23");
+        model.addConstraint("X31", "X32");
+        model.addConstraint("X32", "X33");
+        model.addConstraint("X11", "X21");
+        model.addConstraint("X21", "X31");
+        model.addConstraint("X12", "X22");
+        model.addConstraint("X22", "X32");
+        model.addConstraint("X13", "X23");
+        model.addConstraint("X23", "X33");
 
         model.assignFactors();
 

@@ -8,7 +8,9 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static ch.idsia.intas.Results.results;
 
@@ -26,9 +28,17 @@ public class Main {
 		final String filenameAnswers = args[1]; // "student-answers.xlsx"
 		final String filenameResults = args[2]; // "results.xlsx"
 
+		final Set<Integer> sts = new HashSet<>(); // 1, 11, 12
+		if (args.length > 3)
+			for (int i = 3; i < args.length; i++)
+				sts.add(Integer.parseInt(args[i]));
+
 		System.out.println("Questions filename: " + filenameQuestions);
 		System.out.println("Answers filename:   " + filenameAnswers);
 		System.out.println("Results filename:   " + filenameResults);
+
+		if (!sts.isEmpty())
+			System.out.println("Limited to ids:     " + sts);
 
 		final Path questionsSkillsXLSX = Paths.get(filenameQuestions);
 		final Path studentAnswersXLSX = Paths.get(filenameAnswers);
@@ -57,12 +67,10 @@ public class Main {
 
 		final long startTime = System.currentTimeMillis();
 
-		// final Set<Integer> sts = Set.of(1, 11, 12);
-
 		// sequential students analysis
 		for (Student student : students) {
-			// if (!sts.contains(student.id))
-			//	continue;
+			if (!sts.isEmpty() && !sts.contains(student.id))
+				continue;
 
 			final TIntIntHashMap obs = new TIntIntHashMap();
 			student.answers.forEach((q, answer) -> {
@@ -90,13 +98,16 @@ public class Main {
 			if (model.hasLeak)
 				obs.put(model.leakVar, 1);
 
+			// add constraints variables
+			for (Integer constraint : model.constraints)
+				obs.put(constraint, 1);
+
 			final List<BayesianFactor> query = inf.query(model.model, obs, skills);
 
-			for (int i = 0; i < query.size(); i++) {
+			for (int i = 0; i < query.size(); i++)
 				student.results.put(model.skills.get(i), query.get(i));
-			}
 
-			final double[] outs = query.stream().map(x -> x.getValue(0)).mapToDouble(x -> x).toArray();
+			final double[] outs = query.stream().map(x -> x.getValue(1)).mapToDouble(x -> x).toArray();
 
 			System.out.printf("%3d: %s%n", student.id, Arrays.toString(outs));
 		}
