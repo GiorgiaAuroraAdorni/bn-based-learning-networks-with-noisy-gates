@@ -80,7 +80,7 @@ public class Model {
      * @param l1  skill L1
      * @param l2 skill L2
      */
-    void addConstraint(String l1, String l2) {
+    void addConstraint(String l2, String l1) {
         // left < right: (NOT left) OR (right)
         var L1 = nameToIdx.get(l1);
         var L2 = nameToIdx.get(l2);
@@ -88,14 +88,18 @@ public class Model {
         int D = model.addVariable(2);
         factors.put(D, BayesianFactorFactory.factory()
                 .domain(model.getDomain(L1, L2, D))
-                .set(1.0, 0, 1, 1) // P(D=1|L1, L2)
-                .set(0.0, 1, 0, 1) // P(D=1|L1, L2)
-                .set(1.0, 0, 1, 1) // P(D=1|L1, L2)
-                .set(1.0, 1, 1, 1) // P(D=1|L1, L2)
-                .set(0.0, 0, 1, 0) // P(D=0|L1, L2)
-                .set(1.0, 1, 0, 0) // P(D=0|L1, L2)
-                .set(0.0, 0, 1, 0) // P(D=0|L1, L2)
-                .set(0.0, 1, 1, 0) // P(D=0|L1, L2)
+                //  p(D) L1 L2  D
+                .set(1.0, 0, 1, 1) // P(D=1|L1=0, L2=1)
+                .set(0.0, 0, 1, 0) // P(D=0|L1=0, L2=1)
+
+                .set(1.0, 0, 0, 1) // P(D=1|L1=0, L2=0)
+                .set(0.0, 0, 0, 0) // P(D=0|L1=0, L2=0)
+
+                .set(1.0, 1, 1, 1) // P(D=1|L1=1, L2=1)
+                .set(0.0, 1, 1, 0) // P(D=0|L1=1, L2=1)
+
+                .set(0.0, 1, 0, 1) // P(D=1|L1=1, L2=0)
+                .set(1.0, 1, 0, 0) // P(D=0|L1=1, L2=0)
                 .get()
         );
 

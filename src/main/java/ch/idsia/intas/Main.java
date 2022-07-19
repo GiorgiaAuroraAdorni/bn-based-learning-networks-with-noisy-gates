@@ -7,10 +7,7 @@ import gnu.trove.map.hash.TIntIntHashMap;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static ch.idsia.intas.Results.results;
 
@@ -20,6 +17,12 @@ import static ch.idsia.intas.Results.results;
  * Date:    09.02.2022 10:06
  */
 public class Main {
+
+	static void observeConstraint(Model model, TIntIntHashMap obs) {
+		// add constraints variables
+		for (Integer constraint : model.constraints)
+			obs.put(constraint, 1);
+	}
 
 	public static void main(String[] args) throws IOException {
 
@@ -68,39 +71,42 @@ public class Main {
 		final long startTime = System.currentTimeMillis();
 
 		// sequential students analysis
+		int studentCount = 0, inferenceCount = 0;
 		for (Student student : students) {
 			if (!sts.isEmpty() && !sts.contains(student.id))
 				continue;
 
+			studentCount ++;
+
 			final TIntIntHashMap obs = new TIntIntHashMap();
+			// add constraints variables
+			observeConstraint(model ,obs);
+
 			student.answers.forEach((q, answer) -> {
 				// answers can be yes (1), no (0), empty (no evidence)
 				if (!answer.isEmpty() && model.questionIds.contains(q)) {
-					obs.put(
-							model.nameToIdx.get(q),
-							answer.equals("yes") ? 1 : 0
-					);
+					final int i = model.nameToIdx.get(q);
+					if (answer.equals("yes"))
+						obs.put(i, 1);
+					if (answer.equals("no"))
+						obs.put(i, 0);
 				}
 
-				/*
-				final List<BayesianFactor> qs = inf.query(model.model, obs, skills);
-				final Map<String, BayesianFactor> ans = new LinkedHashMap<>();
-				for (int i = 0; i < qs.size(); i++) {
-					final String skl = model.skills.get(i);
-					final BayesianFactor res = qs.get(i);
-					ans.put(skl, res);
+				if (!sts.isEmpty()) {
+					final List<BayesianFactor> qs = inf.query(model.model, obs, skills);
+					final Map<String, BayesianFactor> ans = new LinkedHashMap<>();
+					for (int i = 0; i < qs.size(); i++) {
+						final String skl = model.skills.get(i);
+						final BayesianFactor res = qs.get(i);
+						ans.put(skl, res);
+					}
+					student.resultsPerQuestion.put(q, ans);
 				}
-				student.resultsPerQuestion.put(q, ans);
-				*/
 			});
 
 			// in case of a leak variable, observe it
 			if (model.hasLeak)
 				obs.put(model.leakVar, 1);
-
-			// add constraints variables
-			for (Integer constraint : model.constraints)
-				obs.put(constraint, 1);
 
 			final List<BayesianFactor> query = inf.query(model.model, obs, skills);
 
@@ -112,9 +118,12 @@ public class Main {
 			System.out.printf("%3d: %s%n", student.id, Arrays.toString(outs));
 		}
 
+		if (studentCount == 0)
+			studentCount = 1;
+
 		final long endTime = System.currentTimeMillis();
 		final double timeSpan = (endTime - startTime) / 1000.0;
-		final double avgTime = timeSpan / students.size();
+		final double avgTime = timeSpan / studentCount;
 
 		System.out.printf("Completed in %.3f seconds (average: %.3f seconds)%n", timeSpan, avgTime);
 

@@ -45,23 +45,43 @@ public class Results {
 			cellId.setCellValue("Student_ID");
 			cellId.setCellStyle(styleHeader);
 
+			// cell "Question_ID"
+			final Cell cellQid = sheet.getRow(0).createCell(1);
+			cellQid.setCellValue("Q_ID");
+			cellQid.setCellStyle(styleHeader);
+
+			// cell "Answer"
+			final Cell cellAnswer = sheet.getRow(0).createCell(2);
+			cellAnswer.setCellValue("Answer");
+			cellAnswer.setCellStyle(styleHeader);
+
 			final CellRangeAddress r1 = new CellRangeAddress(0, 1, 0, 0);
 			sheet.addMergedRegion(r1);
 			RegionUtil.setBorderBottom(BorderStyle.THIN, r1, sheet);
 			RegionUtil.setBorderRight(BorderStyle.THIN, r1, sheet);
 
+			final CellRangeAddress r2 = new CellRangeAddress(0, 1, 1, 1);
+			sheet.addMergedRegion(r2);
+			RegionUtil.setBorderBottom(BorderStyle.THIN, r2, sheet);
+			RegionUtil.setBorderRight(BorderStyle.THIN, r2, sheet);
+
+			final CellRangeAddress r3 = new CellRangeAddress(0, 1, 2, 2);
+			sheet.addMergedRegion(r3);
+			RegionUtil.setBorderBottom(BorderStyle.THIN, r3, sheet);
+			RegionUtil.setBorderRight(BorderStyle.THIN, r3, sheet);
+
 			final CellStyle styleHeaderSkills = workbook.createCellStyle();
 			styleHeaderSkills.cloneStyleFrom(source.getRow(0).getCell(Model.SKILL_START).getCellStyle());
 
 			// cell "Skills"
-			final Cell cellSkills = sheet.getRow(0).createCell(1);
+			final Cell cellSkills = sheet.getRow(0).createCell(3);
 			cellSkills.setCellValue("Skills");
 			cellSkills.setCellStyle(styleHeaderSkills);
 
-			final CellRangeAddress r2 = new CellRangeAddress(0, 0, 1, model.nSkill());
-			sheet.addMergedRegion(r2);
-			RegionUtil.setBorderBottom(BorderStyle.THIN, r2, sheet);
-			RegionUtil.setBorderRight(BorderStyle.THIN, r2, sheet);
+			final CellRangeAddress r4 = new CellRangeAddress(0, 0, 3, 2 + model.nSkill());
+			sheet.addMergedRegion(r4);
+			RegionUtil.setBorderBottom(BorderStyle.THIN, r4, sheet);
+			RegionUtil.setBorderRight(BorderStyle.THIN, r4, sheet);
 
 			// style for skill cells
 			final CellStyle styleHeaderBot = workbook.createCellStyle();
@@ -74,13 +94,13 @@ public class Results {
 
 			// add skill cells
 			for (int c = 0; c < model.nSkill(); c++) {
-				final Cell cell = sheet.getRow(1).createCell(1 + c);
+				final Cell cell = sheet.getRow(1).createCell(3 + c);
 				cell.setCellValue(source.getRow(1).getCell(Model.SKILL_START + c).getStringCellValue());
 				cell.setCellStyle(styleHeaderBot);
 				sheet.setColumnWidth(c, source.getColumnWidth(Model.SKILL_START + c));
 			}
 
-			sheet.getRow(1).getCell(model.nSkill()).setCellStyle(styleHeaderBot2);
+			sheet.getRow(1).getCell(2 + model.nSkill()).setCellStyle(styleHeaderBot2);
 
 			// format for data
 			final DataFormat format = workbook.createDataFormat();
@@ -88,45 +108,47 @@ public class Results {
 			final short f = format.getFormat("0.00");
 			df.setDataFormat(f);
 
-			final CellStyle styleFirstCol = workbook.createCellStyle();
-			styleFirstCol.cloneStyleFrom(source.getRow(4).getCell(1).getCellStyle());
-			styleFirstCol.setBorderRight(BorderStyle.THIN);
-
-			final CellStyle styleBRightDf = workbook.createCellStyle();
-			styleBRightDf.cloneStyleFrom(df);
-			styleBRightDf.setBorderRight(BorderStyle.THIN);
-
 			for (int i = 0, l = 0; i < students.size(); i++) {
 				final Student student = students.get(i);
-				final Row row = sheet.createRow(HEADER_ROWS + (l++));
-				int j = 0;
+				Row row;
+				int j;
+				Cell cell;
 
-				Cell cell = row.createCell(j++);
-				cell.setCellValue(student.id);
-				cell.setCellStyle(styleFirstCol);
-
-				for (String skill : model.skills) {
-					cell = row.createCell(j++);
-					if (student.results.containsKey(skill))
-						cell.setCellValue(student.results.get(skill).getValue(1));
-					cell.setCellStyle(df);
-				}
-				row.getCell(model.nSkill()).setCellStyle(styleBRightDf);
-
+				// student answers
 				for (String k : student.resultsPerQuestion.keySet()) {
-					final Row row2 = sheet.createRow(HEADER_ROWS + (l++));
+					row = sheet.createRow(HEADER_ROWS + (l++));
 					j = 0;
-					cell = row2.createCell(j++);
+					cell = row.createCell(j++);
+					cell.setCellValue(student.id);
+
+					cell = row.createCell(j++);
 					cell.setCellValue("Q" + k);
-					cell.setCellStyle(styleFirstCol);
+
+					cell = row.createCell(j++);
+					cell.setCellValue(student.answers.get(k));
+
 					for (String skill : model.skills) {
-						cell = row2.createCell(j++);
+						cell = row.createCell(j++);
 						final Map<String, BayesianFactor> map = student.resultsPerQuestion.get(k);
 						if (map.containsKey(skill))
 							cell.setCellValue(map.get(skill).getValue(1));
 						cell.setCellStyle(df);
 					}
-					row2.getCell(model.nSkill()).setCellStyle(styleBRightDf);
+				}
+
+				j = 0;
+				row = sheet.createRow(HEADER_ROWS + (l++));
+				cell = row.createCell(j++);
+				cell.setCellValue(student.id);
+
+				j += 2;
+
+				// student skills
+				for (String skill : model.skills) {
+					cell = row.createCell(j++);
+					if (student.results.containsKey(skill))
+						cell.setCellValue(student.results.get(skill).getValue(1));
+					cell.setCellStyle(df);
 				}
 			}
 
