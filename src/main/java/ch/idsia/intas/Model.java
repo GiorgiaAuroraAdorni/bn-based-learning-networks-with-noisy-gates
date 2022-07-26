@@ -26,17 +26,39 @@ import static ch.idsia.intas.Utils.questionName;
  */
 public class Model {
 
+	record Skill(int column, String name, String desc, int index) {
+		@Override
+		public String toString() {
+			return name;
+		}
+	}
+
+	record Connection(Skill skill, double lambda) {
+	}
+
+	final static Set<String> OR_LEFT = new HashSet<>();
+	final static Set<String> OR_RIGHT = new HashSet<>();
+
+	static {
+		for (int i = 1; i <= 14; i++)
+			OR_LEFT.add("E" + i);
+		for (int i = 15; i <= 30; i++)
+			OR_RIGHT.add("E" + i);
+	}
+
 	static int Q_ID = 0;
 	static int SQ_ID = 1;
-	static int Q_TYPE = 3;
+	static int Q_TEXT = 3;
 	static int SKILL_START = 4;
+
+	static int QUESTION_START = 4;
 
 	final DAGModel<BayesianFactor> model = new DAGModel<>();
 
 	final Map<String, Integer> nameToIdx = new LinkedHashMap<>();
 	final Map<Integer, String> idxToName = new LinkedHashMap<>();
 
-	final List<String> skills = new ArrayList<>();
+	final List<Skill> skills = new ArrayList<>();
 	final Set<String> questionIds = new HashSet<>();
 
 	final Map<Integer, BayesianFactor> factors = new LinkedHashMap<>();
@@ -50,15 +72,29 @@ public class Model {
 		return skills.size();
 	}
 
+	int[] skillIds() {
+		return skills.stream()
+				.mapToInt(Skill::index)
+				.toArray();
+	}
+
+	private Skill find(String name) {
+		for (Skill skill : skills) {
+			if (skill.name.equals(name))
+				return skill;
+		}
+		throw new IllegalStateException("Skill " + name + " does not exist!");
+	}
+
 	/**
 	 * @param name Name of the new skill
 	 * @return the index of the new variable
 	 */
-	int addSkill(String name, double p1) {
+	int addSkill(int c, String name, String desc, double p1) {
 		final int v = model.addVariable(2);
-		nameToIdx.put(name, v);
-		idxToName.put(v, name);
-		skills.add(name);
+		final Skill s = new Skill(c, name, desc, v);
+
+		skills.add(s);
 
 		factors.put(v, BayesianFactorFactory.factory()
 				.domain(model.getDomain(v))
@@ -82,8 +118,8 @@ public class Model {
 	 */
 	void addConstraint(String l2, String l1) {
 		// left < right: (NOT left) OR (right)
-		var L1 = nameToIdx.get(l1);
-		var L2 = nameToIdx.get(l2);
+		int L1 = find(l1).index;
+		int L2 = find(l2).index;
 
 		int D = model.addVariable(2);
 		factors.put(D, BayesianFactorFactory.factory()
@@ -113,8 +149,8 @@ public class Model {
 	 * @return the index of the new variable
 	 */
 	int addXiAnd(int i, double lambda_i) {
-		final String skill = skills.get(i);
-		final int xi = nameToIdx.get(skill);
+		final Skill skill = skills.get(i);
+		final int xi = skill.index;
 
 		// add Xi' nodes for each parents...
 		final int xit = model.addVariable(2);
@@ -136,13 +172,12 @@ public class Model {
 	}
 
 	/**
-	 * @param i        index of the skill
+	 * @param skill    skill associated with this inhibitor node
 	 * @param lambda_i lambda_i value to use
 	 * @return the index of the new variable
 	 */
-	int addXiOr(int i, double lambda_i) {
-		final String skill = skills.get(i);
-		final int xi = nameToIdx.get(skill);
+	int addXiOr(Skill skill, double lambda_i) {
+		final int xi = skill.index;
 
 		// add Xi' nodes for each parents...
 		final int xit = model.addVariable(2);
@@ -163,20 +198,23 @@ public class Model {
 		return xit;
 	}
 
-	/**
-	 * @param nodeName Name of this node
-	 * @param parents  parents variables of this node
-	 * @return the index of the new variable
-	 */
-	int addQuestionAnd(String nodeName, TIntList parents) {
-		questionIds.add(nodeName);
+	int addOrNode(TIntList parents) {
+		final int or = model.addVariable(2);
+		model.addParents(or, parents.toArray());
+		final TIntList vars = new TIntArrayList(parents);
+		vars.insert(0, or);
 
-		// create and add AND node with X' parents
+		factors.put(or, BayesianFactorFactory.factory()
+				.domain(model.getDomain(vars.toArray()))
+				.or(parents.toArray())
+		);
+
+		return or;
+	}
+
+	int addAndNode(TIntList parents) {
 		final int and = model.addVariable(2);
 		model.addParents(and, parents.toArray());
-		nameToIdx.put(nodeName, and);
-		idxToName.put(and, nodeName);
-
 		final TIntList vars = new TIntArrayList(parents);
 		vars.insert(0, and);
 
@@ -193,24 +231,39 @@ public class Model {
 	 * @param parents  parents variables of this node
 	 * @return the index of the new variable
 	 */
-	int addQuestionOr(String nodeName, TIntList parents) {
+	int addQuestion(String nodeName, List<Connection> parents) {
 		questionIds.add(nodeName);
 
-		// create and add AND node with X' parents
-		final int or = model.addVariable(2);
-		model.addParents(or, parents.toArray());
-		nameToIdx.put(nodeName, or);
-		idxToName.put(or, nodeName);
+		if (parents.size() < 2) {
+			// in case we have only one parents
+			final Connection c = parents.get(0);
+			return addXiOr(c.skill, c.lambda);
+		}
 
-		final TIntList vars = new TIntArrayList(parents);
-		vars.insert(0, or);
+		// (E1 OR ... OR E14) AND (E15 OR ... OR E27 OR E28 OR E29 OR E30)
 
-		factors.put(or, BayesianFactorFactory.factory()
-				.domain(model.getDomain(vars.toArray()))
-				.or(parents.toArray())
-		);
+		final TIntList parentsLeft = new TIntArrayList();
+		final TIntList parentsRight = new TIntArrayList();
 
-		return or;
+		for (Connection p : parents) {
+			int xi = addXiOr(p.skill, p.lambda);
+			if (OR_LEFT.contains(p.skill.name))
+				parentsLeft.add(xi);
+			if (OR_RIGHT.contains(p.skill.name))
+				parentsRight.add(xi);
+		}
+
+		// create and add OR node with X' parents for LEFT side of expression
+		int orLeft = addOrNode(parentsLeft);
+		// create and add OR node with X' parents for RIGHT side of expression
+		int orRight = addOrNode(parentsRight);
+
+		int and = addAndNode(new TIntArrayList(new int[]{orLeft, orRight}));
+
+		nameToIdx.put(nodeName, and);
+		idxToName.put(and, nodeName);
+
+		return and;
 	}
 
 	/**
@@ -233,30 +286,30 @@ public class Model {
 				switch (cell.getStringCellValue().toUpperCase()) {
 					case "QUESTION_ID" -> Q_ID = c;
 					case "SUB_QUESTION_ID" -> SQ_ID = c;
-					case "QUESTION_TYPE" -> Q_TYPE = c;
+					case "QUESTION_TEXT" -> Q_TEXT = c;
 					case "SKILLS" -> SKILL_START = c;
 				}
 			}
 
 			// parse for skills
-			final Row skillName = sheetQuestions.getRow(1);
-			final Row skillValue = sheetQuestions.getRow(2);
+			final Row skillDesc = sheetQuestions.getRow(2);
+			final Row skillName = sheetQuestions.getRow(3);
 
 			for (int c = SKILL_START; c < header.getLastCellNum(); c++) {
+				final String desc = skillDesc.getCell(c).getStringCellValue();
 				final String skill = skillName.getCell(c).getStringCellValue();
-				final double value = skillValue.getCell(c).getNumericCellValue();
-				model.addSkill(skill, value);
+				final double value = 0.5;
+				model.addSkill(c, skill, desc, value);
 			}
 
 			// parse for questions
 			String qid = null, sqid = null;
 
-			for (int r = 3; r < sheetQuestions.getLastRowNum(); r++) {
+			for (int r = QUESTION_START; r < sheetQuestions.getLastRowNum(); r++) {
 				final Row row = sheetQuestions.getRow(r);
 
 				final Cell cellQID = row.getCell(Q_ID);
 				final Cell cellSQID = row.getCell(SQ_ID);
-				final Cell cellType = row.getCell(Q_TYPE);
 
 				if (cellSQID == null || cellSQID.toString().isEmpty())
 					continue;
@@ -267,37 +320,25 @@ public class Model {
 				if (sqid == null || !cellSQID.toString().isEmpty())
 					sqid = "" + cellToInt(cellSQID);
 
-				String QType = "AND";
-				if (cellType != null)
-					QType = cellType.getStringCellValue().toUpperCase();
-
-				final TIntList parents = new TIntArrayList();
+				final List<Connection> parents = new ArrayList<>();
 
 				for (int i = 0; i < model.nSkill(); i++) {
 					final Cell cell = row.getCell(SKILL_START + i);
 					if (cell == null)
 						continue;
 
-					final double lambda_i = 1.0 - cell.getNumericCellValue();
+					final double value = cell.getNumericCellValue();
 
 					// skip if there is no lambda (no connection)
-					if (lambda_i <= 0)
+					if (value <= 0)
 						continue;
 
-					if (QType.equals("AND")) {
-						final int xit = model.addXiAnd(i, lambda_i);
-						parents.add(xit);
-					} else if (QType.equals("OR")) {
-						final int xit = model.addXiOr(i, lambda_i);
-						parents.add(xit);
-					}
+					final double lambda_i = 1.0 - value;
+
+					parents.add(new Connection(model.skills.get(i), lambda_i));
 				}
 
-				if (QType.equals("AND")) {
-					model.addQuestionAnd(questionName(qid, sqid), parents);
-				} else if (QType.equals("OR")) {
-					model.addQuestionOr(questionName(qid, sqid), parents);
-				}
+				model.addQuestion(questionName(qid, sqid), parents);
 			}
 		}
 

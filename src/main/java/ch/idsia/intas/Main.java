@@ -51,13 +51,8 @@ public class Main {
 
 		System.out.println("Found " + students.size() + " students");
 
-		// leak is the last node
-		final String leak = model.skills.get(model.skills.size() - 1);
-
 		// available skills
-		final int[] skills = model.skills.stream()
-				.filter(skill -> !skill.equals(leak))
-				.map(model.nameToIdx::get).mapToInt(x -> x).toArray();
+		final int[] skills = model.skillIds();
 
 		// inference engine
 		final LoopyBeliefPropagation<BayesianFactor> inf = new LoopyBeliefPropagation<>();
@@ -89,9 +84,9 @@ public class Main {
 
 				if (!sts.isEmpty()) {
 					final List<BayesianFactor> qs = inf.query(model.model, obs, skills);
-					final Map<String, BayesianFactor> ans = new LinkedHashMap<>();
+					final Map<Model.Skill, BayesianFactor> ans = new LinkedHashMap<>();
 					for (int i = 0; i < qs.size(); i++) {
-						final String skl = model.skills.get(i);
+						final Model.Skill skl = model.skills.get(i);
 						final BayesianFactor res = qs.get(i);
 						ans.put(skl, res);
 					}

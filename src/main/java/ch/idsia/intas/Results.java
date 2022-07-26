@@ -127,9 +127,9 @@ public class Results {
 					cell = row.createCell(j++);
 					cell.setCellValue(student.answers.get(k));
 
-					for (String skill : model.skills) {
+					for (Model.Skill skill : model.skills) {
 						cell = row.createCell(j++);
-						final Map<String, BayesianFactor> map = student.resultsPerQuestion.get(k);
+						final Map<Model.Skill, BayesianFactor> map = student.resultsPerQuestion.get(k);
 						if (map.containsKey(skill))
 							cell.setCellValue(map.get(skill).getValue(1));
 						cell.setCellStyle(df);
@@ -144,7 +144,7 @@ public class Results {
 				j += 2;
 
 				// student skills
-				for (String skill : model.skills) {
+				for (Model.Skill skill : model.skills) {
 					cell = row.createCell(j++);
 					if (student.results.containsKey(skill))
 						cell.setCellValue(student.results.get(skill).getValue(1));
