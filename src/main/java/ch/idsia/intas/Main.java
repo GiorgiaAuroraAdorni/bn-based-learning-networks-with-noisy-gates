@@ -18,12 +18,6 @@ import static ch.idsia.intas.Results.results;
  */
 public class Main {
 
-	static void observeConstraint(Model model, TIntIntHashMap obs) {
-		// add constraints variables
-		for (Integer constraint : model.constraints)
-			obs.put(constraint, 1);
-	}
-
 	public static void main(String[] args) throws IOException {
 
 		// input arguments
@@ -80,7 +74,8 @@ public class Main {
 
 			final TIntIntHashMap obs = new TIntIntHashMap();
 			// add constraints variables
-			observeConstraint(model ,obs);
+			for (Integer constraint : model.constraints)
+				obs.put(constraint, 1);
 
 			student.answers.forEach((q, answer) -> {
 				// answers can be yes (1), no (0), empty (no evidence)
