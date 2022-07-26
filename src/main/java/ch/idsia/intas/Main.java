@@ -2,6 +2,8 @@ package ch.idsia.intas;
 
 import ch.idsia.crema.factor.bayesian.BayesianFactor;
 import ch.idsia.crema.inference.bp.LoopyBeliefPropagation;
+import ch.idsia.crema.inference.ve.FactorVariableElimination;
+import ch.idsia.crema.inference.ve.order.MinFillOrdering;
 import gnu.trove.map.hash.TIntIntHashMap;
 
 import java.io.IOException;
@@ -17,12 +19,6 @@ import static ch.idsia.intas.Results.results;
  * Date:    09.02.2022 10:06
  */
 public class Main {
-
-	static void observeConstraint(Model model, TIntIntHashMap obs) {
-		// add constraints variables
-		for (Integer constraint : model.constraints)
-			obs.put(constraint, 1);
-	}
 
 	public static void main(String[] args) throws IOException {
 
@@ -68,19 +64,28 @@ public class Main {
 		// inference engine
 		final LoopyBeliefPropagation<BayesianFactor> inf = new LoopyBeliefPropagation<>();
 
+		final MinFillOrdering mfo = new MinFillOrdering();
+		int[] sequence = mfo.apply(model.model);
+		final FactorVariableElimination<BayesianFactor> ve = new FactorVariableElimination<>(sequence);
+
 		final long startTime = System.currentTimeMillis();
 
+		double masMean = 0;
+
 		// sequential students analysis
-		int studentCount = 0, inferenceCount = 0;
+		int studentCount = 0;
 		for (Student student : students) {
 			if (!sts.isEmpty() && !sts.contains(student.id))
 				continue;
 
-			studentCount ++;
+			studentCount++;
 
+			// observations map
 			final TIntIntHashMap obs = new TIntIntHashMap();
-			// add constraints variables
-			observeConstraint(model ,obs);
+
+			// add constraints variables to observations
+			for (Integer constraint : model.constraints)
+				obs.put(constraint, 1);
 
 			student.answers.forEach((q, answer) -> {
 				// answers can be yes (1), no (0), empty (no evidence)
@@ -110,16 +115,29 @@ public class Main {
 
 			final List<BayesianFactor> query = inf.query(model.model, obs, skills);
 
+			final List<BayesianFactor> queryVe = Arrays.stream(skills).mapToObj(s -> ve.query(model.model, obs, s)).toList();
+
 			for (int i = 0; i < query.size(); i++)
 				student.results.put(model.skills.get(i), query.get(i));
 
 			final double[] outs = query.stream().map(x -> x.getValue(1)).mapToDouble(x -> x).toArray();
+			final double[] outsVe = queryVe.stream().map(x -> x.getValue(1)).mapToDouble(x -> x).toArray();
 
-			System.out.printf("%3d: %s%n", student.id, Arrays.toString(outs));
+			double mas = 0;
+			for (int i = 0; i < outs.length; i++) {
+				mas += Math.abs(outs[i] - outsVe[i]) / outs.length;
+			}
+
+			masMean += mas;
+			System.out.printf("%3d: %s [MAE: %.4f]%n", student.id, Arrays.toString(outs), mas);
 		}
 
 		if (studentCount == 0)
 			studentCount = 1;
+
+		masMean /= studentCount;
+
+		System.out.printf("MAS mean: %.4f%n", masMean);
 
 		final long endTime = System.currentTimeMillis();
 		final double timeSpan = (endTime - startTime) / 1000.0;
