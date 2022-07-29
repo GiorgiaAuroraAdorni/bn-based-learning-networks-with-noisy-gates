@@ -51,7 +51,7 @@ public class Model {
 	static int Q_ID = 0;
 	static int SQ_ID = 1;
 	static int Q_TEXT = 3;
-	static int SKILL_START = 4;
+	static int SKILL_START = 3;
 
 	static int QUESTION_ROW_START = 4;
 

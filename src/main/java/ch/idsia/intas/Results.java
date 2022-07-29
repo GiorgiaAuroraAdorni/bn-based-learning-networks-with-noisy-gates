@@ -86,7 +86,7 @@ public class Results {
 				final CellStyle styleDescr = workbook.createCellStyle();
 				styleDescr.cloneStyleFrom(srcDescr.getCellStyle());
 
-				final Cell cellDescr = sheet.getRow(0).createCell(Model.SKILL_START + c);
+				final Cell cellDescr = sheet.getRow(0).createCell(Model.SKILL_START + c + 1);
 				cellDescr.setCellValue(srcDescr.getStringCellValue());
 				cellDescr.setCellStyle(styleDescr);
 				sheet.setColumnWidth(c, source.getColumnWidth(Model.SKILL_START + c));
@@ -96,7 +96,7 @@ public class Results {
 				styleDescr.cloneStyleFrom(srcDescr.getCellStyle());
 				styleName.setBorderBottom(BorderStyle.THIN);
 
-				final Cell cellName = sheet.getRow(1).createCell(Model.SKILL_START + c);
+				final Cell cellName = sheet.getRow(1).createCell(Model.SKILL_START + c + 1);
 				cellName.setCellValue(srcName.getStringCellValue());
 				cellName.setCellStyle(styleName);
 				sheet.setColumnWidth(c, source.getColumnWidth(Model.SKILL_START + c));
