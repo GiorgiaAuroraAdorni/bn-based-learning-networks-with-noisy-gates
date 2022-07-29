@@ -29,7 +29,7 @@
         <dependency>
             <groupId>ch.idsia</groupId>
             <artifactId>crema</artifactId>
-            <version>0.2.2</version>
+            <version>0.2.2-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
 

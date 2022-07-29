@@ -1,6 +1,7 @@
 package ch.idsia.intas;
 
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 
 /**
  * Author:  Claudio "Dna" Bonesana
@@ -10,6 +11,8 @@ import org.apache.poi.ss.usermodel.Cell;
 public class Utils {
 
 	public static int cellToInt(Cell cell) {
+		if (cell.getCellType().equals(CellType.STRING))
+			return Integer.parseInt(cell.getStringCellValue());
 		return Double.valueOf(cell.getNumericCellValue()).intValue();
 	}
 

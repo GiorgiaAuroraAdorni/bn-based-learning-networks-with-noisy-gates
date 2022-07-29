@@ -45,62 +45,62 @@ public class Results {
 			cellId.setCellValue("Student_ID");
 			cellId.setCellStyle(styleHeader);
 
+			final CellRangeAddress rId = new CellRangeAddress(0, 1, 0, 0);
+			sheet.addMergedRegion(rId);
+			RegionUtil.setBorderBottom(BorderStyle.THIN, rId, sheet);
+			RegionUtil.setBorderRight(BorderStyle.THIN, rId, sheet);
+
 			// cell "Question_ID"
 			final Cell cellQid = sheet.getRow(0).createCell(1);
-			cellQid.setCellValue("Q_ID");
+			cellQid.setCellValue("Question_ID");
 			cellQid.setCellStyle(styleHeader);
 
+			final CellRangeAddress rQid = new CellRangeAddress(0, 1, 1, 1);
+			sheet.addMergedRegion(rQid);
+			RegionUtil.setBorderBottom(BorderStyle.THIN, rQid, sheet);
+			RegionUtil.setBorderRight(BorderStyle.THIN, rQid, sheet);
+
+			// cell "Sub_Question_ID"
+			final Cell cellSqid = sheet.getRow(0).createCell(2);
+			cellSqid.setCellValue("Sub_Question_ID");
+			cellSqid.setCellStyle(styleHeader);
+
+			final CellRangeAddress rSqid = new CellRangeAddress(0, 1, 2, 2);
+			sheet.addMergedRegion(rSqid);
+			RegionUtil.setBorderBottom(BorderStyle.THIN, rSqid, sheet);
+			RegionUtil.setBorderRight(BorderStyle.THIN, rSqid, sheet);
+
 			// cell "Answer"
-			final Cell cellAnswer = sheet.getRow(0).createCell(2);
+			final Cell cellAnswer = sheet.getRow(0).createCell(3);
 			cellAnswer.setCellValue("Answer");
 			cellAnswer.setCellStyle(styleHeader);
 
-			final CellRangeAddress r1 = new CellRangeAddress(0, 1, 0, 0);
-			sheet.addMergedRegion(r1);
-			RegionUtil.setBorderBottom(BorderStyle.THIN, r1, sheet);
-			RegionUtil.setBorderRight(BorderStyle.THIN, r1, sheet);
-
-			final CellRangeAddress r2 = new CellRangeAddress(0, 1, 1, 1);
-			sheet.addMergedRegion(r2);
-			RegionUtil.setBorderBottom(BorderStyle.THIN, r2, sheet);
-			RegionUtil.setBorderRight(BorderStyle.THIN, r2, sheet);
-
-			final CellRangeAddress r3 = new CellRangeAddress(0, 1, 2, 2);
-			sheet.addMergedRegion(r3);
-			RegionUtil.setBorderBottom(BorderStyle.THIN, r3, sheet);
-			RegionUtil.setBorderRight(BorderStyle.THIN, r3, sheet);
-
-			final CellStyle styleHeaderSkills = workbook.createCellStyle();
-			styleHeaderSkills.cloneStyleFrom(source.getRow(0).getCell(Model.SKILL_START).getCellStyle());
-
-			// cell "Skills"
-			final Cell cellSkills = sheet.getRow(0).createCell(3);
-			cellSkills.setCellValue("Skills");
-			cellSkills.setCellStyle(styleHeaderSkills);
-
-			final CellRangeAddress r4 = new CellRangeAddress(0, 0, 3, 2 + model.nSkill());
-			sheet.addMergedRegion(r4);
-			RegionUtil.setBorderBottom(BorderStyle.THIN, r4, sheet);
-			RegionUtil.setBorderRight(BorderStyle.THIN, r4, sheet);
-
-			// style for skill cells
-			final CellStyle styleHeaderBot = workbook.createCellStyle();
-			styleHeaderBot.cloneStyleFrom(source.getRow(1).getCell(Model.SKILL_START).getCellStyle());
-
-			final CellStyle styleHeaderBot2 = workbook.createCellStyle();
-			styleHeaderBot2.cloneStyleFrom(styleHeaderBot);
-			styleHeaderBot2.setBorderRight(BorderStyle.THIN);
-			styleHeaderBot2.setBorderBottom(BorderStyle.THIN);
+			final CellRangeAddress rAns = new CellRangeAddress(0, 1, 3, 3);
+			sheet.addMergedRegion(rAns);
+			RegionUtil.setBorderBottom(BorderStyle.THIN, rAns, sheet);
+			RegionUtil.setBorderRight(BorderStyle.THIN, rAns, sheet);
 
 			// add skill cells
 			for (int c = 0; c < model.nSkill(); c++) {
-				final Cell cell = sheet.getRow(1).createCell(3 + c);
-				cell.setCellValue(source.getRow(1).getCell(Model.SKILL_START + c).getStringCellValue());
-				cell.setCellStyle(styleHeaderBot);
+				final Cell srcDescr = source.getRow(2).getCell(Model.SKILL_START + c);
+				final CellStyle styleDescr = workbook.createCellStyle();
+				styleDescr.cloneStyleFrom(srcDescr.getCellStyle());
+
+				final Cell cellDescr = sheet.getRow(0).createCell(Model.SKILL_START + c);
+				cellDescr.setCellValue(srcDescr.getStringCellValue());
+				cellDescr.setCellStyle(styleDescr);
+				sheet.setColumnWidth(c, source.getColumnWidth(Model.SKILL_START + c));
+
+				final Cell srcName = source.getRow(3).getCell(Model.SKILL_START + c);
+				CellStyle styleName = workbook.createCellStyle();
+				styleDescr.cloneStyleFrom(srcDescr.getCellStyle());
+				styleName.setBorderBottom(BorderStyle.THIN);
+
+				final Cell cellName = sheet.getRow(1).createCell(Model.SKILL_START + c);
+				cellName.setCellValue(srcName.getStringCellValue());
+				cellName.setCellStyle(styleName);
 				sheet.setColumnWidth(c, source.getColumnWidth(Model.SKILL_START + c));
 			}
-
-			sheet.getRow(1).getCell(2 + model.nSkill()).setCellStyle(styleHeaderBot2);
 
 			// format for data
 			final DataFormat format = workbook.createDataFormat();
@@ -121,8 +121,15 @@ public class Results {
 					cell = row.createCell(j++);
 					cell.setCellValue(student.id);
 
+					final String[] ks = k.split("_");
+					final int qid = Integer.parseInt(ks[0]);
+					final int sqid = Integer.parseInt(ks[1]);
+
 					cell = row.createCell(j++);
-					cell.setCellValue("Q" + k);
+					cell.setCellValue(qid);
+
+					cell = row.createCell(j++);
+					cell.setCellValue(sqid);
 
 					cell = row.createCell(j++);
 					cell.setCellValue(student.answers.get(k));
@@ -141,7 +148,7 @@ public class Results {
 				cell = row.createCell(j++);
 				cell.setCellValue(student.id);
 
-				j += 2;
+				j += 3;
 
 				// student skills
 				for (Model.Skill skill : model.skills) {

@@ -34,9 +34,6 @@ public class Main {
 		System.out.println("Answers filename:   " + filenameAnswers);
 		System.out.println("Results filename:   " + filenameResults);
 
-		if (!sts.isEmpty())
-			System.out.println("Limited to ids:     " + sts);
-
 		final Path questionsSkillsXLSX = Paths.get(filenameQuestions);
 		final Path studentAnswersXLSX = Paths.get(filenameAnswers);
 		final Path resultsXLSX = Paths.get(filenameResults);
@@ -45,11 +42,17 @@ public class Main {
 		final Model model = Model.parse(questionsSkillsXLSX);
 
 		System.out.println("Found model with " + model.model.getVariables().length + " variables");
+		System.out.println("- skills:    " + model.nSkill());
+		System.out.println("- questions: " + model.questionIds.size());
+		System.out.println("- leak node: " + model.hasLeak);
 
 		// students parsing
 		final List<Student> students = Student.parse(studentAnswersXLSX);
 
 		System.out.println("Found " + students.size() + " students");
+
+		if (!sts.isEmpty())
+			System.out.println("Limited to ids:     " + sts);
 
 		// available skills
 		final int[] skills = model.skillIds();
@@ -60,7 +63,7 @@ public class Main {
 		final long startTime = System.currentTimeMillis();
 
 		// sequential students analysis
-		int studentCount = 0, inferenceCount = 0;
+		int studentCount = 0;
 		for (Student student : students) {
 			if (!sts.isEmpty() && !sts.contains(student.id))
 				continue;
@@ -73,8 +76,12 @@ public class Main {
 				obs.put(constraint, 1);
 
 			student.answers.forEach((q, answer) -> {
+				if (!model.questionIds.contains(q))
+					// we have questions not supported by the model: we skip them
+					return;
+
 				// answers can be yes (1), no (0), empty (no evidence)
-				if (!answer.isEmpty() && model.questionIds.contains(q)) {
+				if (!answer.isEmpty()) {
 					final int i = model.nameToIdx.get(q);
 					if (answer.equals("yes"))
 						obs.put(i, 1);

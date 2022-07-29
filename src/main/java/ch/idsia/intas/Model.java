@@ -39,6 +39,8 @@ public class Model {
 	final static Set<String> OR_LEFT = new HashSet<>();
 	final static Set<String> OR_RIGHT = new HashSet<>();
 
+	final static Set<String> CT_CUBE = Set.of("X11", "X12", "X13", "X21", "X22", "X23", "X31", "X32", "X33");
+
 	static {
 		for (int i = 1; i <= 14; i++)
 			OR_LEFT.add("E" + i);
@@ -51,7 +53,7 @@ public class Model {
 	static int Q_TEXT = 3;
 	static int SKILL_START = 4;
 
-	static int QUESTION_START = 4;
+	static int QUESTION_ROW_START = 4;
 
 	final DAGModel<BayesianFactor> model = new DAGModel<>();
 
@@ -88,12 +90,14 @@ public class Model {
 
 	/**
 	 * @param name Name of the new skill
-	 * @return the index of the new variable
+	 * @return the created skill
 	 */
-	int addSkill(int c, String name, String desc, double p1) {
+	Skill addSkill(int c, String name, String desc, double p1) {
 		final int v = model.addVariable(2);
 		final Skill s = new Skill(c, name, desc, v);
 
+		idxToName.put(v, name);
+		nameToIdx.put(name, v);
 		skills.add(s);
 
 		factors.put(v, BayesianFactorFactory.factory()
@@ -107,7 +111,7 @@ public class Model {
 			leakVar = v;
 		}
 
-		return v;
+		return s;
 	}
 
 	/**
@@ -182,19 +186,16 @@ public class Model {
 		// add Xi' nodes for each parents...
 		final int xit = model.addVariable(2);
 		model.addParent(xit, xi);
-		nameToIdx.put(skill + "_i", xit);
-		idxToName.put(xit, skill + "_i");
 
 		/// ... and assign lambda
 		factors.put(xit, BayesianFactorFactory.factory()
-				.domain(model.getDomain(xi, xit))
+				.domain(model.getDomain(xit, xi))
 				.set(1.0 - lambda_i, 1, 1) // P(Xi'=1|Xi=1) = 1 - lambda_i
-				.set(0.0, 0, 1)            // P(Xi'=1|Xi=0) = 0
-				.set(lambda_i, 1, 0)       // P(Xi'=0|Xi=1) = lambda_i
-				.set(1.0, 0, 0)            // P(Xi'=0|Xi=0) = 1
+				.set(lambda_i, 0, 1) // P(Xi'=0|Xi=1) = lambda_i
+				.set(0.0, 1, 0) // P(Xi'=1|Xi=0) = 0
+				.set(1.0, 0, 0) // P(Xi'=0|Xi=0) = 1
 				.get());
 
-		// collect parents for AND node
 		return xit;
 	}
 
@@ -229,41 +230,91 @@ public class Model {
 	/**
 	 * @param nodeName Name of this node
 	 * @param parents  parents variables of this node
-	 * @return the index of the new variable
 	 */
 	int addQuestion(String nodeName, List<Connection> parents) {
-		questionIds.add(nodeName);
+		if (parents.isEmpty())
+			return -1;
 
-		if (parents.size() < 2) {
+		questionIds.add(nodeName);
+		int q;
+
+		if (parents.size() == 1) {
 			// in case we have only one parents
 			final Connection c = parents.get(0);
-			return addXiOr(c.skill, c.lambda);
+			q = addXiOr(c.skill, c.lambda);
+			nameToIdx.put(nodeName, q);
+			idxToName.put(q, nodeName);
+			return q;
 		}
 
 		// (E1 OR ... OR E14) AND (E15 OR ... OR E27 OR E28 OR E29 OR E30)
 
 		final TIntList parentsLeft = new TIntArrayList();
 		final TIntList parentsRight = new TIntArrayList();
+		final TIntList parentsCT = new TIntArrayList();
 
 		for (Connection p : parents) {
 			int xi = addXiOr(p.skill, p.lambda);
+			nameToIdx.put(p.skill + "_i", xi);
+			idxToName.put(xi, p.skill + "_i");
+
 			if (OR_LEFT.contains(p.skill.name))
 				parentsLeft.add(xi);
 			if (OR_RIGHT.contains(p.skill.name))
 				parentsRight.add(xi);
+			if (CT_CUBE.contains(p.skill.name))
+				parentsCT.add(xi);
 		}
 
+		final TIntList list = new TIntArrayList();
+
 		// create and add OR node with X' parents for LEFT side of expression
-		int orLeft = addOrNode(parentsLeft);
+		if (!parentsLeft.isEmpty()) {
+			final int or = addOrNode(parentsLeft);
+			final String orName = nodeName + "_or1";
+			list.add(or);
+			nameToIdx.put(orName, or);
+			idxToName.put(or, orName);
+		}
 		// create and add OR node with X' parents for RIGHT side of expression
-		int orRight = addOrNode(parentsRight);
+		if (!parentsRight.isEmpty()) {
+			final int or = addOrNode(parentsRight);
+			final String orName = nodeName + "_or2";
+			list.add(or);
+			nameToIdx.put(orName, or);
+			idxToName.put(or, orName);
+		}
+		// create and add OR node with X' parents for CT side of expression
+		if (!parentsCT.isEmpty()) {
+			final int or = addOrNode(parentsCT);
+			final String orName = nodeName + "_or3";
+			list.add(or);
+			nameToIdx.put(orName, or);
+			idxToName.put(or, orName);
+		}
 
-		int and = addAndNode(new TIntArrayList(new int[]{orLeft, orRight}));
+		if (list.size() == 1) {
+			q = list.get(0);
+		} else {
+			q = addAndNode(list);
+		}
 
-		nameToIdx.put(nodeName, and);
-		idxToName.put(and, nodeName);
+		nameToIdx.put(nodeName, q);
+		idxToName.put(q, nodeName);
 
-		return and;
+		return q;
+	}
+
+	public void print(String question, int depth) {
+		var q = nameToIdx.get(question);
+		for (int i = 0; i < depth; i++)
+			System.out.print("- ");
+
+		System.out.println(q + " " + question + " " + factors.get(q));
+		for (int p : model.getParents(q)) {
+			var n = idxToName.get(p);
+			print(n, depth + 1);
+		}
 	}
 
 	/**
@@ -305,7 +356,7 @@ public class Model {
 			// parse for questions
 			String qid = null, sqid = null;
 
-			for (int r = QUESTION_START; r < sheetQuestions.getLastRowNum(); r++) {
+			for (int r = QUESTION_ROW_START; r < sheetQuestions.getLastRowNum(); r++) {
 				final Row row = sheetQuestions.getRow(r);
 
 				final Cell cellQID = row.getCell(Q_ID);

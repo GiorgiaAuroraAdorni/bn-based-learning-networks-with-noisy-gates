@@ -1,10 +1,7 @@
 package ch.idsia.intas;
 
 import ch.idsia.crema.factor.bayesian.BayesianFactor;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.FileInputStream;
@@ -28,6 +25,9 @@ public class Student {
 	static int Q_ID = 0;
 	static int SQ_ID = 1;
 	static int ANSWER_START = 3;
+
+	static int STUDENTS_ID_ROW = 0;
+	static int ANSWERS_FIRST_ROW = 1;
 
 	final int id;
 	final Map<String, String> answers = new LinkedHashMap<>();
@@ -57,6 +57,8 @@ public class Student {
 			final Row header = sheetAnswer.getRow(0);
 			for (int c = header.getFirstCellNum(); c < header.getLastCellNum(); c++) {
 				final Cell cell = header.getCell(c);
+				if (!cell.getCellType().equals(CellType.STRING))
+					continue;
 				switch (cell.getStringCellValue().toUpperCase()) {
 					case "QUESTION_ID" -> Q_ID = c;
 					case "SUB_QUESTION_ID" -> SQ_ID = c;
@@ -65,7 +67,7 @@ public class Student {
 			}
 
 			// parse for students
-			final Row studentIds = sheetAnswer.getRow(2);
+			final Row studentIds = sheetAnswer.getRow(STUDENTS_ID_ROW);
 			for (int i = ANSWER_START; i < studentIds.getLastCellNum(); i++) {
 				final int id = cellToInt(studentIds.getCell(i));
 				students.add(new Student(id));
@@ -74,7 +76,7 @@ public class Student {
 			String qid = null, sqid = null;
 
 			// parse for answers
-			for (int r = 3; r < sheetAnswer.getLastRowNum(); r++) {
+			for (int r = ANSWERS_FIRST_ROW; r < sheetAnswer.getLastRowNum(); r++) {
 				final Row row = sheetAnswer.getRow(r);
 
 				final Cell cellQID = row.getCell(Q_ID);
@@ -92,7 +94,7 @@ public class Student {
 				for (int i = 0; i < students.size(); i++) {
 					final Cell cell = row.getCell(ANSWER_START + i);
 
-					if (cell.getStringCellValue().isEmpty())
+					if (cell == null || cell.getStringCellValue().isEmpty())
 						continue;
 
 					students.get(i).addAnswer(qid, sqid, cell.toString().trim().toLowerCase());
