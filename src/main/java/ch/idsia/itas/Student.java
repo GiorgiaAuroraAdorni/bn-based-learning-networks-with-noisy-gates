@@ -1,4 +1,4 @@
-package ch.idsia.intas;
+package ch.idsia.itas;
 
 import ch.idsia.crema.factor.bayesian.BayesianFactor;
 import org.apache.poi.ss.usermodel.*;
@@ -12,8 +12,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static ch.idsia.intas.Utils.cellToInt;
-import static ch.idsia.intas.Utils.questionName;
+import static ch.idsia.itas.Utils.cellToInt;
+import static ch.idsia.itas.Utils.questionName;
 
 /**
  * Author:  Claudio "Dna" Bonesana

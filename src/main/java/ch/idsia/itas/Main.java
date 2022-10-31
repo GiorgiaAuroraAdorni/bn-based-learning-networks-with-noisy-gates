@@ -1,4 +1,4 @@
-package ch.idsia.intas;
+package ch.idsia.itas;
 
 import ch.idsia.crema.factor.bayesian.BayesianFactor;
 import ch.idsia.crema.inference.bp.LoopyBeliefPropagation;
@@ -9,7 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
-import static ch.idsia.intas.Results.results;
+import static ch.idsia.itas.Results.results;
 
 /**
  * Author:  Claudio "Dna" Bonesana

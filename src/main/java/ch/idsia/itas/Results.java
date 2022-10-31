@@ -1,4 +1,4 @@
-package ch.idsia.intas;
+package ch.idsia.itas;
 
 import ch.idsia.crema.factor.bayesian.BayesianFactor;
 import org.apache.poi.ss.usermodel.*;
