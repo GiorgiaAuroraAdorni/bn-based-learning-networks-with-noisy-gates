@@ -1,4 +1,4 @@
-package ch.idsia.intas;
+package ch.idsia.itas;
 
 import ch.idsia.crema.factor.bayesian.BayesianFactor;
 import ch.idsia.crema.factor.bayesian.BayesianFactorFactory;
@@ -16,8 +16,8 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
 
-import static ch.idsia.intas.Utils.cellToInt;
-import static ch.idsia.intas.Utils.questionName;
+import static ch.idsia.itas.Utils.cellToInt;
+import static ch.idsia.itas.Utils.questionName;
 
 /**
  * Author:  Claudio "Dna" Bonesana

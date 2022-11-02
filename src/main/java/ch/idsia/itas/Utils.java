@@ -1,4 +1,4 @@
-package ch.idsia.intas;
+package ch.idsia.itas;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
