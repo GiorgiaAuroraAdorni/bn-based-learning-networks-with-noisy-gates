@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>ch.idsia</groupId>
-    <artifactId>intas</artifactId>
+    <artifactId>itas</artifactId>
     <version>1.0</version>
 
     <properties>
@@ -20,7 +20,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>ch.idsia.intas.Main</mainClass>
+                            <mainClass>ch.idsia.itas.Main</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
