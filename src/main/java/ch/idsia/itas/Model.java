@@ -36,12 +36,14 @@ public class Model {
 	record Connection(Skill skill, double lambda) {
 	}
 
+	final static Set<String> OR_LEFT_LEFT = new HashSet<>();
 	final static Set<String> OR_LEFT = new HashSet<>();
 	final static Set<String> OR_RIGHT = new HashSet<>();
 
 	final static Set<String> CT_CUBE = Set.of("X11", "X12", "X13", "X21", "X22", "X23", "X31", "X32", "X33");
 
 	static {
+		OR_LEFT_LEFT.add("E0");
 		for (int i = 1; i <= 14; i++)
 			OR_LEFT.add("E" + i);
 		for (int i = 15; i <= 30; i++)
@@ -247,8 +249,8 @@ public class Model {
 			return q;
 		}
 
-		// (E1 OR ... OR E14) AND (E15 OR ... OR E27 OR E28 OR E29 OR E30)
-
+		// (E0) AND (E1 OR ... OR E14) AND (E15 OR ... OR E27 OR E28 OR E29 OR E30)
+		final TIntList parentsLeftLeft = new TIntArrayList();
 		final TIntList parentsLeft = new TIntArrayList();
 		final TIntList parentsRight = new TIntArrayList();
 		final TIntList parentsCT = new TIntArrayList();
@@ -258,6 +260,8 @@ public class Model {
 			nameToIdx.put(p.skill + "_i", xi);
 			idxToName.put(xi, p.skill + "_i");
 
+			if (OR_LEFT_LEFT.contains(p.skill.name))
+				parentsLeftLeft.add(xi);
 			if (OR_LEFT.contains(p.skill.name))
 				parentsLeft.add(xi);
 			if (OR_RIGHT.contains(p.skill.name))
@@ -267,7 +271,14 @@ public class Model {
 		}
 
 		final TIntList list = new TIntArrayList();
-
+		// create and add OR node with X' parents for LEFT_LEFT side of expression
+		if (!parentsLeftLeft.isEmpty()) {
+			final int or = addOrNode(parentsLeftLeft);
+			final String orName = nodeName + "_or0";
+			list.add(or);
+			nameToIdx.put(orName, or);
+			idxToName.put(or, orName);
+		}
 		// create and add OR node with X' parents for LEFT side of expression
 		if (!parentsLeft.isEmpty()) {
 			final int or = addOrNode(parentsLeft);
