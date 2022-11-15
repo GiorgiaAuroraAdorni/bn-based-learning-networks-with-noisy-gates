@@ -43,10 +43,10 @@ public class Model {
 	final static Set<String> CT_CUBE = Set.of("X11", "X12", "X13", "X21", "X22", "X23", "X31", "X32", "X33");
 
 	static {
-		OR_LEFT_LEFT.add("E0");
-		for (int i = 1; i <= 14; i++)
+		OR_LEFT_LEFT.add("E1");
+		for (int i = 2; i <= 15; i++)
 			OR_LEFT.add("E" + i);
-		for (int i = 15; i <= 30; i++)
+		for (int i = 16; i <= 31; i++)
 			OR_RIGHT.add("E" + i);
 	}
 
