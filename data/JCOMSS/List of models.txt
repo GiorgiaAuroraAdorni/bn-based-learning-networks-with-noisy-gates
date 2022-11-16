@@ -1,0 +1,6 @@
+List of models
+
+model 1a: Without elementary skills (unconstrained)
+model 1b: With elementary skills (unconstrained)
+model 2a: Without elementary skills (constrained)
+model 2b: With elementary skills (constrained)
