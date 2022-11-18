@@ -1,7 +1,14 @@
 package ch.idsia.itas;
 
 import ch.idsia.crema.factor.bayesian.BayesianFactor;
+import ch.idsia.crema.inference.InferenceJoined;
 import ch.idsia.crema.inference.bp.LoopyBeliefPropagation;
+import ch.idsia.crema.inference.ve.FactorVariableElimination;
+import ch.idsia.crema.inference.ve.order.MinFillOrdering;
+import ch.idsia.crema.model.graphical.GraphicalModel;
+import ch.idsia.crema.preprocess.CutObserved;
+import ch.idsia.crema.preprocess.RemoveBarren;
+import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 
 import java.io.IOException;
@@ -60,6 +67,26 @@ public class Main {
 		// inference engine
 		final LoopyBeliefPropagation<BayesianFactor> inf = new LoopyBeliefPropagation<>();
 
+
+		final InferenceJoined<GraphicalModel<BayesianFactor>, BayesianFactor> engine = new InferenceJoined<>() {
+			@Override
+			public BayesianFactor query(GraphicalModel<BayesianFactor> model, TIntIntMap evidence, int... queries) {
+				final CutObserved<BayesianFactor> co = new CutObserved<>();
+				final GraphicalModel<BayesianFactor> coModel = co.execute(model, evidence);
+				final RemoveBarren<BayesianFactor> rb = new RemoveBarren<>();
+				final GraphicalModel<BayesianFactor> infModel = rb.execute(coModel, evidence, queries);
+				final MinFillOrdering mf = new MinFillOrdering();
+				final int[] seq = mf.apply(infModel);
+				final FactorVariableElimination<BayesianFactor> fve = new FactorVariableElimination<>(seq);
+				fve.setNormalize(true);
+				return fve.query(infModel, evidence, queries);
+			}
+			@Override
+			public BayesianFactor query(GraphicalModel<BayesianFactor> model, TIntIntMap evidence, int query) {
+				return query(model, evidence, new int[]{query});
+			}
+		};
+
 		final long startTime = System.currentTimeMillis();
 
 		// sequential students analysis
@@ -92,12 +119,14 @@ public class Main {
 				if (!sts.isEmpty()) {
 					final List<BayesianFactor> qs = inf.query(model.model, obs, skills);
 					final Map<Model.Skill, BayesianFactor> ans = new LinkedHashMap<>();
+
 					for (int i = 0; i < qs.size(); i++) {
 						final Model.Skill skl = model.skills.get(i);
 						final BayesianFactor res = qs.get(i);
 						ans.put(skl, res);
 					}
 					student.resultsPerQuestion.put(q, ans);
+//					System.out.printf("%3d: %s%n", student.id, skills);
 				}
 			});
 
