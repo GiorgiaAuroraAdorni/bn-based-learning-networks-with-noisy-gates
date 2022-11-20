@@ -11,7 +11,10 @@ import ch.idsia.crema.preprocess.RemoveBarren;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Writer;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -151,7 +154,15 @@ public class Main {
 		final double timeSpan = (endTime - startTime) / 1000.0;
 		final double avgTime = timeSpan / studentCount;
 
-		System.out.printf("Completed in %.3f seconds (average: %.3f seconds)%n", timeSpan, avgTime);
+		String text = ": Completed in " + timeSpan + " seconds.\n";
+		String filename = "data/model_statistics.txt";
+
+		Writer output;
+		output = new BufferedWriter(new FileWriter(filename, true));
+		output.append(filenameResults.replace(".xlsx", "")).append(text);
+		output.close();
+
+ 		System.out.printf("Completed in %.3f seconds (average: %.3f seconds)%n", timeSpan, avgTime);
 
 		results(model, students, resultsXLSX, questionsSkillsXLSX);
 
