@@ -1,9 +1,123 @@
 #!/bin/bash
 
-java -jar target/itas-1.0.jar "data/JCOMSS/questions-skill_model1a.xlsx" "data/JCOMSS/student-answers.xlsx" "data/JCOMSS/results_model1a.xlsx"
+AnswersOldA="data/old_posteriors/no_elementary_skills/student-answers.xlsx"
 
-java -jar target/itas-1.0.jar "data/JCOMSS/questions-skill_model2a.xlsx" "data/JCOMSS/student-answers.xlsx" "data/JCOMSS/results_model2a.xlsx"
+ModelOld1aLeak="data/old_posteriors/no_elementary_skills/simple_model/leak/questions-skill-model1a_leak.xlsx"
+ResultsOld1aLeakUnconstrained="data/old_posteriors/no_elementary_skills/simple_model/leak/unconstrained/results_model1a_leak_unconstrained.xlsx"
+ResultsOld1aLeakConstrained="data/old_posteriors/no_elementary_skills/simple_model/leak/constrained/results_model1a_leak_constrained.xlsx"
 
-java -jar target/itas-1.0.jar "data/CAT_COMMANDS/questions-skill_model1b.xlsx" "data/CAT_COMMANDS/student-answers-commands.xlsx" "data/CAT_COMMANDS/results_model1b.xlsx"
+java -jar target/itas-1.0.jar $ModelOld1aLeak $AnswersOldA $ResultsOld1aLeakUnconstrained "unconstrained"
+java -jar target/itas-1.0.jar $ModelOld1aLeak $AnswersOldA $ResultsOld1aLeakConstrained "constrained"
 
-java -jar target/itas-1.0.jar "data/CAT_COMMANDS/questions-skill_model2b.xlsx" "data/CAT_COMMANDS/student-answers-commands.xlsx" "data/CAT_COMMANDS/results_model2b.xlsx"
+ModelOld1aNoleak="data/old_posteriors/no_elementary_skills/simple_model/noleak/questions-skill-model1a_noleak.xlsx"
+ResultsOld1aNoleakUnconstrained="data/old_posteriors/no_elementary_skills/simple_model/noleak/unconstrained/results_model1a_noleak_unconstrained.xlsx"
+ResultsOld1aNoleakConstrained="data/old_posteriors/no_elementary_skills/simple_model/noleak/constrained/results_model1a_noleak_constrained.xlsx"
+
+java -jar target/itas-1.0.jar $ModelOld1aNoleak $AnswersOldA $ResultsOld1aNoleakUnconstrained "unconstrained"
+java -jar target/itas-1.0.jar $ModelOld1aNoleak $AnswersOldA $ResultsOld1aNoleakConstrained "constrained"
+
+ModelOld2aLeak="data/old_posteriors/no_elementary_skills/complex_model/leak/questions-skill-model2a_leak.xlsx"
+ResultsOld2aLeakUnconstrained="data/old_posteriors/no_elementary_skills/complex_model/leak/unconstrained/results_model2a_leak_unconstrained.xlsx"
+ResultsOld2aLeakConstrained="data/old_posteriors/no_elementary_skills/complex_model/leak/constrained/results_model2a_leak_constrained.xlsx"
+
+java -jar target/itas-1.0.jar $ModelOld2aLeak $AnswersOldA $ResultsOld2aLeakUnconstrained "unconstrained"
+java -jar target/itas-1.0.jar $ModelOld2aLeak $AnswersOldA $ResultsOld2aLeakConstrained "constrained"
+
+ModelOld2aNoleak="data/old_posteriors/no_elementary_skills/complex_model/noleak/questions-skill-model2a_noleak.xlsx"
+ResultsOld2aNoleakUnconstrained="data/old_posteriors/no_elementary_skills/complex_model/noleak/unconstrained/results_model2a_noleak_unconstrained.xlsx"
+ResultsOld2aNoleakConstrained="data/old_posteriors/no_elementary_skills/complex_model/noleak/constrained/results_model2a_noleak_constrained.xlsx"
+
+java -jar target/itas-1.0.jar $ModelOld2aNoleak $AnswersOldA $ResultsOld2aNoleakUnconstrained "unconstrained"
+java -jar target/itas-1.0.jar $ModelOld2aNoleak $AnswersOldA $ResultsOld2aNoleakConstrained "constrained"
+
+
+AnswersNewA="data/new_posteriors/no_elementary_skills/student-answers.xlsx"
+
+ModelNew1aLeak="data/new_posteriors/no_elementary_skills/simple_model/leak/questions-skill-model1a_leak.xlsx"
+ResultsNew1aLeakUnconstrained="data/new_posteriors/no_elementary_skills/simple_model/leak/unconstrained/results_model1a_leak_unconstrained.xlsx"
+ResultsNew1aLeakConstrained="data/new_posteriors/no_elementary_skills/simple_model/leak/constrained/results_model1a_leak_constrained.xlsx"
+
+java -jar target/itas-1.0.jar $ModelNew1aLeak $AnswersNewA $ResultsNew1aLeakUnconstrained "unconstrained"
+java -jar target/itas-1.0.jar $ModelNew1aLeak $AnswersNewA $ResultsNew1aLeakConstrained "constrained"
+
+ModelNew1aNoleak="data/new_posteriors/no_elementary_skills/simple_model/noleak/questions-skill-model1a_noleak.xlsx"
+ResultsNew1aNoleakUnconstrained="data/new_posteriors/no_elementary_skills/simple_model/noleak/unconstrained/results_model1a_noleak_unconstrained.xlsx"
+ResultsNew1aNoleakConstrained="data/new_posteriors/no_elementary_skills/simple_model/noleak/constrained/results_model1a_noleak_constrained.xlsx"
+
+java -jar target/itas-1.0.jar $ModelNew1aNoleak $AnswersNewA $ResultsNew1aNoleakUnconstrained "unconstrained"
+java -jar target/itas-1.0.jar $ModelNew1aNoleak $AnswersNewA $ResultsNew1aNoleakConstrained "constrained"
+
+ModelNew2aLeak="data/new_posteriors/no_elementary_skills/complex_model/leak/questions-skill-model2a_leak.xlsx"
+ResultsNew2aLeakUnconstrained="data/new_posteriors/no_elementary_skills/complex_model/leak/unconstrained/results_model2a_leak_unconstrained.xlsx"
+ResultsNew2aLeakConstrained="data/new_posteriors/no_elementary_skills/complex_model/leak/constrained/results_model2a_leak_constrained.xlsx"
+
+java -jar target/itas-1.0.jar $ModelNew2aLeak $AnswersNewA $ResultsNew2aLeakUnconstrained "unconstrained"
+java -jar target/itas-1.0.jar $ModelNew2aLeak $AnswersNewA $ResultsNew2aLeakConstrained "constrained"
+
+ModelNew2aNoleak="data/new_posteriors/no_elementary_skills/complex_model/noleak/questions-skill-model2a_noleak.xlsx"
+ResultsNew2aNoleakUnconstrained="data/new_posteriors/no_elementary_skills/complex_model/noleak/unconstrained/results_model2a_noleak_unconstrained.xlsx"
+ResultsNew2aNoleakConstrained="data/new_posteriors/no_elementary_skills/complex_model/noleak/constrained/results_model2a_noleak_constrained.xlsx"
+
+java -jar target/itas-1.0.jar $ModelNew2aNoleak $AnswersNewA $ResultsNew2aNoleakUnconstrained "unconstrained"
+java -jar target/itas-1.0.jar $ModelNew2aNoleak $AnswersNewA $ResultsNew2aNoleakConstrained "constrained"
+
+AnswersOldB="data/old_posteriors/elementary_skills/student-answers-commands.xlsx"
+
+ModelOld1bLeak="data/old_posteriors/elementary_skills/simple_model/leak/questions-skill-model1b_leak.xlsx"
+ResultsOld1bLeakUnconstrained="data/old_posteriors/elementary_skills/simple_model/leak/unconstrained/results_model1b_leak_unconstrained.xlsx"
+ResultsOld1bLeakConstrained="data/old_posteriors/elementary_skills/simple_model/leak/constrained/results_model1b_leak_constrained.xlsx"
+
+java -jar target/itas-1.0.jar $ModelOld1bLeak $AnswersOldB $ResultsOld1bLeakUnconstrained "unconstrained"
+java -jar target/itas-1.0.jar $ModelOld1bLeak $AnswersOldB $ResultsOld1bLeakConstrained "constrained"
+
+ModelOld1bNoleak="data/old_posteriors/elementary_skills/simple_model/noleak/questions-skill-model1b_noleak.xlsx"
+ResultsOld1bNoleakUnconstrained="data/old_posteriors/elementary_skills/simple_model/noleak/unconstrained/results_model1b_noleak_unconstrained.xlsx"
+ResultsOld1bNoleakConstrained="data/old_posteriors/elementary_skills/simple_model/noleak/constrained/results_model1b_noleak_constrained.xlsx"
+
+java -jar target/itas-1.0.jar $ModelOld1bNoleak $AnswersOldB $ResultsOld1bNoleakUnconstrained "unconstrained"
+java -jar target/itas-1.0.jar $ModelOld1bNoleak $AnswersOldB $ResultsOld1bNoleakConstrained "constrained"
+
+ModelOld2bLeak="data/old_posteriors/elementary_skills/complex_model/leak/questions-skill-model2b_leak.xlsx"
+ResultsOld2bLeakUnconstrained="data/old_posteriors/elementary_skills/complex_model/leak/unconstrained/results_model2b_leak_unconstrained.xlsx"
+ResultsOld2bLeakConstrained="data/old_posteriors/elementary_skills/complex_model/leak/constrained/results_model2b_leak_constrained.xlsx"
+
+java -jar target/itas-1.0.jar $ModelOld2bLeak $AnswersOldB $ResultsOld2bLeakUnconstrained "unconstrained"
+java -jar target/itas-1.0.jar $ModelOld2bLeak $AnswersOldB $ResultsOld2bLeakConstrained "constrained"
+
+ModelOld2bNoleak="data/old_posteriors/elementary_skills/complex_model/noleak/questions-skill-model2b_noleak.xlsx"
+ResultsOld2bNoleakUnconstrained="data/old_posteriors/elementary_skills/complex_model/noleak/unconstrained/results_model2b_noleak_unconstrained.xlsx"
+ResultsOld2bNoleakConstrained="data/old_posteriors/elementary_skills/complex_model/noleak/constrained/results_model2b_noleak_constrained.xlsx"
+
+java -jar target/itas-1.0.jar $ModelOld2bNoleak $AnswersOldB $ResultsOld2bNoleakUnconstrained "unconstrained"
+java -jar target/itas-1.0.jar $ModelOld2bNoleak $AnswersOldB $ResultsOld2bNoleakConstrained "constrained"
+
+
+AnswersNewB="data/new_posteriors/elementary_skills/student-answers-commands.xlsx"
+
+ModelNew1bLeak="data/new_posteriors/elementary_skills/simple_model/leak/questions-skill-model1b_leak.xlsx"
+ResultsNew1bLeakUnconstrained="data/new_posteriors/elementary_skills/simple_model/leak/unconstrained/results_model1b_leak_unconstrained.xlsx"
+ResultsNew1bLeakConstrained="data/new_posteriors/elementary_skills/simple_model/leak/constrained/results_model1b_leak_constrained.xlsx"
+
+java -jar target/itas-1.0.jar $ModelNew1bLeak $AnswersNewB $ResultsNew1bLeakUnconstrained "unconstrained"
+java -jar target/itas-1.0.jar $ModelNew1bLeak $AnswersNewB $ResultsNew1bLeakConstrained "constrained"
+
+ModelNew1bNoleak="data/new_posteriors/elementary_skills/simple_model/noleak/questions-skill-model1b_noleak.xlsx"
+ResultsNew1bNoleakUnconstrained="data/new_posteriors/elementary_skills/simple_model/noleak/unconstrained/results_model1b_noleak_unconstrained.xlsx"
+ResultsNew1bNoleakConstrained="data/new_posteriors/elementary_skills/simple_model/noleak/constrained/results_model1b_noleak_constrained.xlsx"
+
+java -jar target/itas-1.0.jar $ModelNew1bNoleak $AnswersNewB $ResultsNew1bNoleakUnconstrained "unconstrained"
+java -jar target/itas-1.0.jar $ModelNew1bNoleak $AnswersNewB $ResultsNew1bNoleakConstrained "constrained"
+
+ModelNew2bLeak="data/new_posteriors/elementary_skills/complex_model/leak/questions-skill-model2b_leak.xlsx"
+ResultsNew2bLeakUnconstrained="data/new_posteriors/elementary_skills/complex_model/leak/unconstrained/results_model2b_leak_unconstrained.xlsx"
+ResultsNew2bLeakConstrained="data/new_posteriors/elementary_skills/complex_model/leak/constrained/results_model2b_leak_constrained.xlsx"
+
+java -jar target/itas-1.0.jar $ModelNew2bLeak $AnswersNewB $ResultsNew2bLeakUnconstrained "unconstrained"
+java -jar target/itas-1.0.jar $ModelNew2bLeak $AnswersNewB $ResultsNew2bLeakConstrained "constrained"
+
+ModelNew2bNoleak="data/new_posteriors/elementary_skills/complex_model/noleak/questions-skill-model2b_noleak.xlsx"
+ResultsNew2bNoleakUnconstrained="data/new_posteriors/elementary_skills/complex_model/noleak/unconstrained/results_model2b_noleak_unconstrained.xlsx"
+ResultsNew2bNoleakConstrained="data/new_posteriors/elementary_skills/complex_model/noleak/constrained/results_model2b_noleak_constrained.xlsx"
+
+java -jar target/itas-1.0.jar $ModelNew2bNoleak $AnswersNewB $ResultsNew2bNoleakUnconstrained "unconstrained"
+java -jar target/itas-1.0.jar $ModelNew2bNoleak $AnswersNewB $ResultsNew2bNoleakConstrained "constrained"
