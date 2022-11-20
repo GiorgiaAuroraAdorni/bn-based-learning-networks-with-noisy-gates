@@ -28,21 +28,31 @@ import static ch.idsia.itas.Results.results;
  */
 public class Main {
 
+	private static boolean hasConstraint;
+
 	public static void main(String[] args) throws IOException {
 
 		// input arguments
 		final String filenameQuestions = args[0]; // "questions-skill.xlsx"
 		final String filenameAnswers = args[1]; // "student-answers.xlsx"
 		final String filenameResults = args[2]; // "results.xlsx"
+		final String strConstraint = args[3]; // "constrained/unconstrained"
+
+		if (strConstraint.equals("constrained")) {
+			hasConstraint = true;
+		} else {
+			hasConstraint = false;
+		}
 
 		final Set<Integer> sts = new HashSet<>(); // 1, 11, 12
-		if (args.length > 3)
-			for (int i = 3; i < args.length; i++)
+		if (args.length > 4)
+			for (int i = 4; i < args.length; i++)
 				sts.add(Integer.parseInt(args[i]));
 
 		System.out.println("Questions filename: " + filenameQuestions);
 		System.out.println("Answers filename:   " + filenameAnswers);
 		System.out.println("Results filename:   " + filenameResults);
+		System.out.println("Constraint: " + hasConstraint);
 
 		final Path questionsSkillsXLSX = Paths.get(filenameQuestions);
 		final Path studentAnswersXLSX = Paths.get(filenameAnswers);
@@ -102,8 +112,9 @@ public class Main {
 
 			final TIntIntHashMap obs = new TIntIntHashMap();
 			// add constraints variables
-			for (Integer constraint : model.constraints)
-				obs.put(constraint, 1);
+			if (hasConstraint == true)
+				for (Integer constraint : model.constraints)
+					obs.put(constraint, 1);
 
 			student.answers.forEach((q, answer) -> {
 				if (!model.questionIds.contains(q))
