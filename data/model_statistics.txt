@@ -1,0 +1,16 @@
+data/old_posteriors/no_elementary_skills/simple_model/leak/unconstrained/results_model1a_leak_unconstrained: Completed in 52.053 seconds.
+data/old_posteriors/no_elementary_skills/simple_model/leak/constrained/results_model1a_leak_constrained: Completed in 55.113 seconds.
+data/old_posteriors/no_elementary_skills/simple_model/noleak/unconstrained/results_model1a_noleak_unconstrained: Completed in 52.582 seconds.
+data/old_posteriors/no_elementary_skills/simple_model/noleak/constrained/results_model1a_noleak_constrained: Completed in 56.684 seconds.
+data/old_posteriors/no_elementary_skills/complex_model/leak/unconstrained/results_model2a_leak_unconstrained: Completed in 47.772 seconds.
+data/old_posteriors/no_elementary_skills/complex_model/leak/constrained/results_model2a_leak_constrained: Completed in 59.937 seconds.
+data/old_posteriors/no_elementary_skills/complex_model/noleak/unconstrained/results_model2a_noleak_unconstrained: Completed in 50.643 seconds.
+data/old_posteriors/no_elementary_skills/complex_model/noleak/constrained/results_model2a_noleak_constrained: Completed in 56.405 seconds.
+data/new_posteriors/no_elementary_skills/simple_model/leak/unconstrained/results_model1a_leak_unconstrained: Completed in 51.107 seconds.
+data/new_posteriors/no_elementary_skills/simple_model/leak/constrained/results_model1a_leak_constrained: Completed in 57.371 seconds.
+data/new_posteriors/no_elementary_skills/simple_model/noleak/unconstrained/results_model1a_noleak_unconstrained: Completed in 57.008 seconds.
+data/new_posteriors/no_elementary_skills/simple_model/noleak/constrained/results_model1a_noleak_constrained: Completed in 61.297 seconds.
+data/new_posteriors/no_elementary_skills/complex_model/leak/unconstrained/results_model2a_leak_unconstrained: Completed in 62.449 seconds.
+data/new_posteriors/no_elementary_skills/complex_model/leak/constrained/results_model2a_leak_constrained: Completed in 57.52 seconds.
+data/new_posteriors/no_elementary_skills/complex_model/noleak/unconstrained/results_model2a_noleak_unconstrained: Completed in 56.082 seconds.
+data/new_posteriors/no_elementary_skills/complex_model/noleak/constrained/results_model2a_noleak_constrained: Completed in 61.32 seconds.
