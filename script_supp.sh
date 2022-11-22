@@ -30,7 +30,6 @@ ResultsOld2bNoleakConstrained="data/old_posteriors/elementary_skills/complex_mod
 java -jar target/itas-1.0.jar $ModelOld2bNoleak $AnswersOldB $ResultsOld2bNoleakUnconstrained "unconstrained"
 java -jar target/itas-1.0.jar $ModelOld2bNoleak $AnswersOldB $ResultsOld2bNoleakConstrained "constrained"
 
-
 AnswersNewB="data/new_posteriors/elementary_skills/student-answers-commands.xlsx"
 
 ModelNew1bLeak="data/new_posteriors/elementary_skills/simple_model/leak/questions-skill-model1b_leak.xlsx"
