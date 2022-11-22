@@ -40,7 +40,7 @@ public class Model {
 	final static Set<String> OR_LEFT = new HashSet<>();
 	final static Set<String> OR_RIGHT = new HashSet<>();
 
-	final static Set<String> CT_CUBE = Set.of("X11", "X12", "X13", "X21", "X22", "X23", "X31", "X32", "X33");
+	final static Set<String> CT_CUBE = new HashSet<>(Arrays.asList("X11", "X12", "X13", "X21", "X22", "X23", "X31", "X32", "X33"));
 
 	static {
 		OR_LEFT_LEFT.add("E1");
@@ -111,6 +111,7 @@ public class Model {
 		if (name.equalsIgnoreCase("leak")) {
 			hasLeak = true;
 			leakVar = v;
+			CT_CUBE.add("leak");
 		}
 
 		return s;
