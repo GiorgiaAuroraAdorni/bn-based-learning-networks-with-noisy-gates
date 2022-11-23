@@ -148,10 +148,6 @@ public class Main {
 				}
 			});
 
-			// in case of a leak variable, observe it
-			if (model.hasLeak)
-				obs.put(model.leakVar, 1);
-
 			final List<BayesianFactor> query = inf.query(model.model, obs, skills);
 
 			for (int i = 0; i < query.size(); i++)
