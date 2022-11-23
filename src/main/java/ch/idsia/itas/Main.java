@@ -112,9 +112,13 @@ public class Main {
 
 			final TIntIntHashMap obs = new TIntIntHashMap();
 			// add constraints variables
-			if (hasConstraint == true)
+			if (hasConstraint)
 				for (Integer constraint : model.constraints)
 					obs.put(constraint, 1);
+
+			// in case of a leak variable, observe it
+			if (model.hasLeak)
+				obs.put(model.leakVar, 1);
 
 			student.answers.forEach((q, answer) -> {
 				if (!model.questionIds.contains(q))

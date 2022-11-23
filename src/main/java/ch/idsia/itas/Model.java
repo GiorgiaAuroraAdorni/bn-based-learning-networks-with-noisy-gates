@@ -79,6 +79,7 @@ public class Model {
 	int[] skillIds() {
 		return skills.stream()
 				.mapToInt(Skill::index)
+				.filter(x -> x != leakVar)
 				.toArray();
 	}
 
