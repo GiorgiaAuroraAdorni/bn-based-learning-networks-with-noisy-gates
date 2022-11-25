@@ -1,5 +1,6 @@
 package ch.idsia.itas;
 
+import ch.idsia.crema.factor.FactorUtil;
 import ch.idsia.crema.factor.bayesian.BayesianFactor;
 import ch.idsia.crema.inference.InferenceJoined;
 import ch.idsia.crema.inference.bp.LoopyBeliefPropagation;
@@ -148,7 +149,14 @@ public class Main {
 				}
 			});
 
-			final List<BayesianFactor> query = inf.query(model.model, obs, skills);
+			BayesianFactor f = engine.query(model.model, obs, skills);
+
+//			final List<BayesianFactor> query = inf.query(model.model, obs, skills);
+			final List<BayesianFactor> query = new ArrayList<>();
+			for(int s: skills) {
+				BayesianFactor bf = FactorUtil.marginal(f, s);
+				query.add(bf);
+			}
 
 			for (int i = 0; i < query.size(); i++)
 				student.results.put(model.skills.get(i), query.get(i));
