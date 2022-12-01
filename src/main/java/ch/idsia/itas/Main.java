@@ -136,7 +136,14 @@ public class Main {
 				}
 
 				if (!sts.isEmpty()) {
-					final List<BayesianFactor> qs = inf.query(model.model, obs, skills);
+					BayesianFactor f = engine.query(model.model, obs, skills);
+
+					final List<BayesianFactor> qs = new ArrayList<>();
+					for(int s: skills) {
+						BayesianFactor bf = FactorUtil.marginal(f, s);
+						qs.add(bf);
+					}
+
 					final Map<Model.Skill, BayesianFactor> ans = new LinkedHashMap<>();
 
 					for (int i = 0; i < qs.size(); i++) {
@@ -144,6 +151,7 @@ public class Main {
 						final BayesianFactor res = qs.get(i);
 						ans.put(skl, res);
 					}
+
 					student.resultsPerQuestion.put(q, ans);
 //					System.out.printf("%3d: %s%n", student.id, skills);
 				}
@@ -151,7 +159,6 @@ public class Main {
 
 			BayesianFactor f = engine.query(model.model, obs, skills);
 
-//			final List<BayesianFactor> query = inf.query(model.model, obs, skills);
 			final List<BayesianFactor> query = new ArrayList<>();
 			for(int s: skills) {
 				BayesianFactor bf = FactorUtil.marginal(f, s);
@@ -162,8 +169,7 @@ public class Main {
 				student.results.put(model.skills.get(i), query.get(i));
 
 			final double[] outs = query.stream().map(x -> x.getValue(1)).mapToDouble(x -> x).toArray();
-
-			System.out.printf("%3d: %s%n", student.id, Arrays.toString(outs));
+//			System.out.printf("%3d: %s%n", student.id, Arrays.toString(outs));
 		}
 
 		if (studentCount == 0)

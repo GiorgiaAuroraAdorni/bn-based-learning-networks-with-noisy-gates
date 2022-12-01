@@ -44,9 +44,9 @@ public class Model {
 
 	static {
 		OR_LEFT_LEFT.add("E1");
-		for (int i = 2; i <= 15; i++)
+		for (int i = 2; i <= 7; i++)
 			OR_LEFT.add("E" + i);
-		for (int i = 16; i <= 31; i++)
+		for (int i = 8; i <= 14; i++)
 			OR_RIGHT.add("E" + i);
 	}
 
