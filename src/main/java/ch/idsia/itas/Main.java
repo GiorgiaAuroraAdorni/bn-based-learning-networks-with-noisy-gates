@@ -29,7 +29,6 @@ import static ch.idsia.itas.Results.results;
  */
 public class Main {
 
-	private static boolean hasConstraint;
 
 	public static void main(String[] args) throws IOException {
 
@@ -38,6 +37,10 @@ public class Main {
 		final String filenameAnswers = args[1]; // "student-answers.xlsx"
 		final String filenameResults = args[2]; // "results.xlsx"
 		final String strConstraint = args[3]; // "constrained/unconstrained"
+		final String strInference = args[4]; // "exact/approximate"
+
+		final boolean hasConstraint;
+		final boolean exactInference;
 
 		if (strConstraint.equals("constrained")) {
 			hasConstraint = true;
@@ -45,15 +48,22 @@ public class Main {
 			hasConstraint = false;
 		}
 
+		if (strInference.equals("exact")) {
+			exactInference = true;
+		} else {
+			exactInference = false;
+		}
+
 		final Set<Integer> sts = new HashSet<>(); // 1, 11, 12
-		if (args.length > 4)
-			for (int i = 4; i < args.length; i++)
+		if (args.length > 5)
+			for (int i = 5; i < args.length; i++)
 				sts.add(Integer.parseInt(args[i]));
 
 		System.out.println("Questions filename: " + filenameQuestions);
 		System.out.println("Answers filename:   " + filenameAnswers);
 		System.out.println("Results filename:   " + filenameResults);
 		System.out.println("Constraint: " + hasConstraint);
+		System.out.println("Exact inference: " + exactInference);
 
 		final Path questionsSkillsXLSX = Paths.get(filenameQuestions);
 		final Path studentAnswersXLSX = Paths.get(filenameAnswers);
@@ -79,7 +89,7 @@ public class Main {
 		final int[] skills = model.skillIds();
 
 		// inference engine
-		final LoopyBeliefPropagation<BayesianFactor> inf = new LoopyBeliefPropagation<>();
+		final LoopyBeliefPropagation<BayesianFactor> inf = new LoopyBeliefPropagation<>(51);
 
 
 		final InferenceJoined<GraphicalModel<BayesianFactor>, BayesianFactor> engine = new InferenceJoined<>() {
@@ -136,15 +146,19 @@ public class Main {
 				}
 
 				if (!sts.isEmpty()) {
-					BayesianFactor f = engine.query(model.model, obs, skills);
-
-					final List<BayesianFactor> qs = new ArrayList<>();
-					for(int s: skills) {
-						BayesianFactor bf = FactorUtil.marginal(f, s);
-						qs.add(bf);
-					}
-
 					final Map<Model.Skill, BayesianFactor> ans = new LinkedHashMap<>();
+					List<BayesianFactor> qs = new ArrayList<>();
+
+					if (exactInference) {
+						BayesianFactor f = engine.query(model.model, obs, skills);
+
+						for(int s: skills) {
+							BayesianFactor bf = FactorUtil.marginal(f, s);
+							qs.add(bf);
+						}
+					} else {
+						qs = inf.query(model.model, obs, skills);
+					}
 
 					for (int i = 0; i < qs.size(); i++) {
 						final Model.Skill skl = model.skills.get(i);
@@ -153,23 +167,28 @@ public class Main {
 					}
 
 					student.resultsPerQuestion.put(q, ans);
-//					System.out.printf("%3d: %s%n", student.id, skills);
+					System.out.printf("%3d: %s%n", student.id, skills);
 				}
 			});
 
-			BayesianFactor f = engine.query(model.model, obs, skills);
+			List<BayesianFactor> query = new ArrayList<>();
 
-			final List<BayesianFactor> query = new ArrayList<>();
-			for(int s: skills) {
-				BayesianFactor bf = FactorUtil.marginal(f, s);
-				query.add(bf);
+			if (exactInference) {
+				BayesianFactor f = engine.query(model.model, obs, skills);
+
+				for(int s: skills) {
+					BayesianFactor bf = FactorUtil.marginal(f, s);
+					query.add(bf);
+				}
+			} else {
+				query = inf.query(model.model, obs, skills);
 			}
 
 			for (int i = 0; i < query.size(); i++)
 				student.results.put(model.skills.get(i), query.get(i));
 
-			final double[] outs = query.stream().map(x -> x.getValue(1)).mapToDouble(x -> x).toArray();
-//			System.out.printf("%3d: %s%n", student.id, Arrays.toString(outs));
+			 final double[] outs = query.stream().map(x -> x.getValue(1)).mapToDouble(x -> x).toArray();
+			 System.out.printf("%3d: %s%n", student.id, Arrays.toString(outs));
 		}
 
 		if (studentCount == 0)
