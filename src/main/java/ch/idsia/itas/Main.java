@@ -89,34 +89,45 @@ public class Main {
 		final int[] skills = model.skillIds();
 
 		// inference engine
-		final LoopyBeliefPropagation<BayesianFactor> inf = new LoopyBeliefPropagation<>(51);
+		final LoopyBeliefPropagation<BayesianFactor> infLBP;
+//		final FactorVariableElimination<BayesianFactor> infVE;
 
+		final InferenceJoined<GraphicalModel<BayesianFactor>, BayesianFactor> infVE;
+		if (exactInference){
+//			infVE = new InferenceJoined<>(){
+//				@Override
+//				public BayesianFactor query(GraphicalModel<BayesianFactor> model, TIntIntMap evidence, int... queries) {
+//					final CutObserved<BayesianFactor> co = new CutObserved<>();
+//					final GraphicalModel<BayesianFactor> coModel = co.execute(model, evidence);
+//					final RemoveBarren<BayesianFactor> rb = new RemoveBarren<>();
+//					final GraphicalModel<BayesianFactor> infModel = rb.execute(coModel, evidence, queries);
+//					final MinFillOrdering mf = new MinFillOrdering();
+//					final int[] seq = mf.apply(infModel);
+//					final FactorVariableElimination<BayesianFactor> fve = new FactorVariableElimination<>(seq);
+//					fve.setNormalize(true);
+//					return fve.query(infModel, evidence, queries);
+//				}
+//				@Override
+//				public BayesianFactor query(GraphicalModel<BayesianFactor> model, TIntIntMap evidence, int query) {
+//					return query(model, evidence, new int[]{query});
+//				}
+//			};
+			final MinFillOrdering mfo = new MinFillOrdering();
+			int[] sequence = mfo.apply(model.model);
+			infVE = new FactorVariableElimination<>(sequence);
+			infLBP = null;
+		} else {
+			infVE = null;
+			infLBP = new LoopyBeliefPropagation<>(51);
 
-		final InferenceJoined<GraphicalModel<BayesianFactor>, BayesianFactor> engine = new InferenceJoined<>() {
-			@Override
-			public BayesianFactor query(GraphicalModel<BayesianFactor> model, TIntIntMap evidence, int... queries) {
-				final CutObserved<BayesianFactor> co = new CutObserved<>();
-				final GraphicalModel<BayesianFactor> coModel = co.execute(model, evidence);
-				final RemoveBarren<BayesianFactor> rb = new RemoveBarren<>();
-				final GraphicalModel<BayesianFactor> infModel = rb.execute(coModel, evidence, queries);
-				final MinFillOrdering mf = new MinFillOrdering();
-				final int[] seq = mf.apply(infModel);
-				final FactorVariableElimination<BayesianFactor> fve = new FactorVariableElimination<>(seq);
-				fve.setNormalize(true);
-				return fve.query(infModel, evidence, queries);
-			}
-			@Override
-			public BayesianFactor query(GraphicalModel<BayesianFactor> model, TIntIntMap evidence, int query) {
-				return query(model, evidence, new int[]{query});
-			}
-		};
+		}
 
 		final long startTime = System.currentTimeMillis();
 
 		// sequential students analysis
 		int studentCount = 0;
 		for (Student student : students) {
-			if (!sts.isEmpty() && !sts.contains(student.id))
+			if (!sts.isEmpty() && !sts.contains(student.id))  // TODO: clarifications
 				continue;
 
 			studentCount ++;
@@ -132,12 +143,12 @@ public class Main {
 				obs.put(model.leakVar, 1);
 
 			student.answers.forEach((q, answer) -> {
-				if (!model.questionIds.contains(q))
+				if (!model.questionIds.contains(q))  // TODO: clarifications
 					// we have questions not supported by the model: we skip them
 					return;
 
 				// answers can be yes (1), no (0), empty (no evidence)
-				if (!answer.isEmpty()) {
+				if (!answer.isEmpty()) {  // TODO: clarifications: empty (no evidence) are already removed...
 					final int i = model.nameToIdx.get(q);
 					if (answer.equals("yes"))
 						obs.put(i, 1);
@@ -150,14 +161,14 @@ public class Main {
 					List<BayesianFactor> qs = new ArrayList<>();
 
 					if (exactInference) {
-						BayesianFactor f = engine.query(model.model, obs, skills);
+						BayesianFactor f = infVE.query(model.model, obs, skills);
 
 						for(int s: skills) {
 							BayesianFactor bf = FactorUtil.marginal(f, s);
 							qs.add(bf);
 						}
 					} else {
-						qs = inf.query(model.model, obs, skills);
+						qs = infLBP.query(model.model, obs, skills);
 					}
 
 					for (int i = 0; i < qs.size(); i++) {
@@ -165,30 +176,30 @@ public class Main {
 						final BayesianFactor res = qs.get(i);
 						ans.put(skl, res);
 					}
-
+//
 					student.resultsPerQuestion.put(q, ans);
-					System.out.printf("%3d: %s%n", student.id, skills);
+					System.out.printf("%3d: %s, %s%n", student.id, q, ans);
 				}
 			});
 
 			List<BayesianFactor> query = new ArrayList<>();
 
 			if (exactInference) {
-				BayesianFactor f = engine.query(model.model, obs, skills);
+				BayesianFactor f = infVE.query(model.model, obs, skills);
 
 				for(int s: skills) {
 					BayesianFactor bf = FactorUtil.marginal(f, s);
 					query.add(bf);
 				}
 			} else {
-				query = inf.query(model.model, obs, skills);
+				query = infLBP.query(model.model, obs, skills);
 			}
 
 			for (int i = 0; i < query.size(); i++)
 				student.results.put(model.skills.get(i), query.get(i));
 
-			 final double[] outs = query.stream().map(x -> x.getValue(1)).mapToDouble(x -> x).toArray();
-			 System.out.printf("%3d: %s%n", student.id, Arrays.toString(outs));
+			final double[] outs = query.stream().map(x -> x.getValue(1)).mapToDouble(x -> x).toArray();
+			System.out.printf("%3d: %s%n", student.id, Arrays.toString(outs));
 		}
 
 		if (studentCount == 0)
