@@ -90,28 +90,9 @@ public class Main {
 
 		// inference engine
 		final LoopyBeliefPropagation<BayesianFactor> infLBP;
-//		final FactorVariableElimination<BayesianFactor> infVE;
-
 		final InferenceJoined<GraphicalModel<BayesianFactor>, BayesianFactor> infVE;
+
 		if (exactInference){
-//			infVE = new InferenceJoined<>(){
-//				@Override
-//				public BayesianFactor query(GraphicalModel<BayesianFactor> model, TIntIntMap evidence, int... queries) {
-//					final CutObserved<BayesianFactor> co = new CutObserved<>();
-//					final GraphicalModel<BayesianFactor> coModel = co.execute(model, evidence);
-//					final RemoveBarren<BayesianFactor> rb = new RemoveBarren<>();
-//					final GraphicalModel<BayesianFactor> infModel = rb.execute(coModel, evidence, queries);
-//					final MinFillOrdering mf = new MinFillOrdering();
-//					final int[] seq = mf.apply(infModel);
-//					final FactorVariableElimination<BayesianFactor> fve = new FactorVariableElimination<>(seq);
-//					fve.setNormalize(true);
-//					return fve.query(infModel, evidence, queries);
-//				}
-//				@Override
-//				public BayesianFactor query(GraphicalModel<BayesianFactor> model, TIntIntMap evidence, int query) {
-//					return query(model, evidence, new int[]{query});
-//				}
-//			};
 			final MinFillOrdering mfo = new MinFillOrdering();
 			int[] sequence = mfo.apply(model.model);
 			infVE = new FactorVariableElimination<>(sequence);
@@ -119,7 +100,6 @@ public class Main {
 		} else {
 			infVE = null;
 			infLBP = new LoopyBeliefPropagation<>(51);
-
 		}
 
 		final long startTime = System.currentTimeMillis();
@@ -127,7 +107,7 @@ public class Main {
 		// sequential students analysis
 		int studentCount = 0;
 		for (Student student : students) {
-			if (!sts.isEmpty() && !sts.contains(student.id))  // TODO: clarifications
+			if (!sts.isEmpty() && !sts.contains(student.id))
 				continue;
 
 			studentCount ++;
@@ -143,12 +123,12 @@ public class Main {
 				obs.put(model.leakVar, 1);
 
 			student.answers.forEach((q, answer) -> {
-				if (!model.questionIds.contains(q))  // TODO: clarifications
+				if (!model.questionIds.contains(q))
 					// we have questions not supported by the model: we skip them
 					return;
 
 				// answers can be yes (1), no (0), empty (no evidence)
-				if (!answer.isEmpty()) {  // TODO: clarifications: empty (no evidence) are already removed...
+				if (!answer.isEmpty()) {
 					final int i = model.nameToIdx.get(q);
 					if (answer.equals("yes"))
 						obs.put(i, 1);
@@ -176,21 +156,16 @@ public class Main {
 						final BayesianFactor res = qs.get(i);
 						ans.put(skl, res);
 					}
-//
+
 					student.resultsPerQuestion.put(q, ans);
 					System.out.printf("%3d: %s, %s%n", student.id, q, ans);
 				}
 			});
 
-			List<BayesianFactor> query = new ArrayList<>();
+			List<BayesianFactor> query;
 
 			if (exactInference) {
-				BayesianFactor f = infVE.query(model.model, obs, skills);
-
-				for(int s: skills) {
-					BayesianFactor bf = FactorUtil.marginal(f, s);
-					query.add(bf);
-				}
+				query = Arrays.stream(skills).mapToObj(s -> infVE.query(model.model, obs, s)).toList();
 			} else {
 				query = infLBP.query(model.model, obs, skills);
 			}
@@ -209,12 +184,12 @@ public class Main {
 		final double timeSpan = (endTime - startTime) / 1000.0;
 		final double avgTime = timeSpan / studentCount;
 
-		String text = ": Completed in " + timeSpan + " seconds.\n";
+		String text = ", " + timeSpan + "\n";
 		String filename = "data/model_statistics.txt";
 
 		Writer output;
 		output = new BufferedWriter(new FileWriter(filename, true));
-		output.append(filenameResults.replace(".xlsx", "")).append(text);
+		output.append(filenameResults.replace(".xlsx", "").replace("data/results/results_questions-skill-", "")).append(text);
 		output.close();
 
  		System.out.printf("Completed in %.3f seconds (average: %.3f seconds)%n", timeSpan, avgTime);
