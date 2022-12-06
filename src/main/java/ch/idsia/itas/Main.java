@@ -138,15 +138,10 @@ public class Main {
 
 				if (!sts.isEmpty()) {
 					final Map<Model.Skill, BayesianFactor> ans = new LinkedHashMap<>();
-					List<BayesianFactor> qs = new ArrayList<>();
+					List<BayesianFactor> qs;
 
 					if (exactInference) {
-						BayesianFactor f = infVE.query(model.model, obs, skills);
-
-						for(int s: skills) {
-							BayesianFactor bf = FactorUtil.marginal(f, s);
-							qs.add(bf);
-						}
+						qs = Arrays.stream(skills).mapToObj(s -> infVE.query(model.model, obs, s)).toList();
 					} else {
 						qs = infLBP.query(model.model, obs, skills);
 					}
