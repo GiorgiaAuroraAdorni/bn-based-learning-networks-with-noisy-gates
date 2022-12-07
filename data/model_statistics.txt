@@ -1,32 +1,24 @@
-data/old_posteriors/target_skills/results/results_model1a_leak_unconstrained: Completed in 32.777 seconds.
-data/old_posteriors/target_skills/results/results_model1a_leak_constrained: Completed in 34.047 seconds.
-data/old_posteriors/target_skills/results/results_model1a_noleak_unconstrained: Completed in 33.084 seconds.
-data/old_posteriors/target_skills/results/results_model1a_noleak_constrained: Completed in 33.084 seconds.
-data/old_posteriors/target_skills/results/results_model2a_leak_unconstrained: Completed in 32.396 seconds.
-data/old_posteriors/target_skills/results/results_model2a_leak_constrained: Completed in 34.047 seconds.
-data/old_posteriors/target_skills/results/results_model2a_noleak_unconstrained: Completed in 32.943 seconds.
-data/old_posteriors/target_skills/results/results_model2a_noleak_constrained: Completed in 33.869 seconds.
-data/new_posteriors/target_skills/results/results_model1a_leak_unconstrained: Completed in 36.02 seconds.
-data/new_posteriors/target_skills/results/results_model1a_leak_constrained: Completed in 26.057 seconds.
-data/new_posteriors/target_skills/results/results_model1a_noleak_unconstrained: Completed in 25.142 seconds.
-data/new_posteriors/target_skills/results/results_model1a_noleak_constrained: Completed in 23.142 seconds.
-data/new_posteriors/target_skills/results/results_model2a_leak_unconstrained: Completed in 36.21 seconds.
-data/new_posteriors/target_skills/results/results_model2a_leak_constrained: Completed in 35.724 seconds.
-data/new_posteriors/target_skills/results/results_model2a_noleak_unconstrained: Completed in 34.486 seconds.
-data/new_posteriors/target_skills/results/results_model2a_noleak_constrained: Completed in 35.509 seconds.
-data/old_posteriors/supplementary_skills_reduced/results/results_model1c_leak_unconstrained: Completed in 720.782 seconds.
-data/old_posteriors/supplementary_skills_reduced/results/results_model1c_leak_constrained: Completed in 654.177 seconds.
-data/old_posteriors/supplementary_skills_reduced/results/results_model1c_noleak_unconstrained: Completed in 744.537 seconds.
-data/old_posteriors/supplementary_skills_reduced/results/results_model1c_noleak_constrained: Completed in 741.509 seconds.
-data/old_posteriors/supplementary_skills_reduced/results/results_model2c_leak_unconstrained: Completed in 20839.38 seconds.
-data/old_posteriors/supplementary_skills_reduced/results/results_model2c_noleak_unconstrained: Completed in 669.388 seconds.
-data/old_posteriors/supplementary_skills_reduced/results/results_model2c_noleak_constrained: Completed in 720.587 seconds.
-data/new_posteriors/supplementary_skills_reduced/results/results_model1c_leak_unconstrained: Completed in 2560.917 seconds.
-data/new_posteriors/supplementary_skills_reduced/results/results_model1c_leak_constrained: Completed in 1054.826 seconds.
-data/new_posteriors/supplementary_skills_reduced/results/results_model1c_noleak_unconstrained: Completed in 760.594 seconds.
-data/new_posteriors/supplementary_skills_reduced/results/results_model1c_noleak_constrained: Completed in 781.874 seconds.
-data/new_posteriors/supplementary_skills_reduced/results/results_model2c_leak_unconstrained: Completed in 834.84 seconds.
-data/new_posteriors/supplementary_skills_reduced/results/results_model2c_leak_constrained: Completed in 871.452 seconds.
-data/new_posteriors/supplementary_skills_reduced/results/results_model2c_noleak_unconstrained: Completed in 773.287 seconds.
-data/new_posteriors/supplementary_skills_reduced/results/results_model2c_noleak_constrained: Completed in 720.59 seconds.
-data/old_posteriors/supplementary_skills_reduced/results/results_model2c_leak_constrained: Completed in 818.489 seconds.
+model1a_leak, 13.936
+model1a_leak_constrained, 14.909
+model1a_leak_constrained_new, 14.96
+model1b_leak_constrained, 213.494
+model1b_leak_constrained_new, 207.369
+model2b_leak_constrained, 213.721
+model2b_leak_constrained_new, 206.47
+model3b_leak_constrained, 203.513
+model3b_leak_constrained_new, 204.852
+data/results/70_results_questions-skill-model1a_leak_unconstrained, 1.791
+data/results/70_results_questions-skill-model1a_leak_unconstrained, 2.039
+model1a_leak, 13.931
+model1a_leak_constrained, 14.665
+model1b_leak_constrained, 158.649
+model2b_leak_constrained, 149.206
+model3b_leak_constrained, 160.592
+data/results/70_results_questions-skill-model3b_leak_constrained, 191.347
+model1a_leak_constrained_simple, 14.22
+model1b_leak_constrained_simple, 156.538
+model2b_leak_constrained_simple, 160.275
+model3b_leak_constrained_simple, 155.09
+data/results/70_results_questions-skill-model3b_leak_constrained_simple, 216.732
+data/results/70_results_questions-skill-model1a_leak_constrained_simple, 4.757
+data/results/70_results_questions-skill-model1a_leak_constrained, 2.131
