@@ -122,6 +122,10 @@ public class Main {
 			if (model.hasLeak)
 				obs.put(model.leakVar, 1);
 
+			List<BayesianFactor> test_qs = Arrays.stream(skills).mapToObj(s -> infVE.query(model.model, obs, s)).toList();
+			final double[] test_outs = test_qs.stream().map(x -> x.getValue(1)).mapToDouble(x -> x).toArray();
+			System.out.printf("%3d: %s%n", student.id, Arrays.toString(test_outs));
+
 			student.answers.forEach((q, answer) -> {
 				if (!model.questionIds.contains(q))
 					// we have questions not supported by the model: we skip them
