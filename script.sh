@@ -2,57 +2,38 @@
 
 mvn clean compile assembly:single
 
-# Basic model
-Model1="data/models/questions-skill-model1a_leak.xlsx"
+# Models
+Model1a="data/models/questions-skill-model1a.xlsx"
+Model1b="data/models/questions-skill-model1b.xlsx"
+Model2b="data/models/questions-skill-model2b.xlsx"
+Model3b="data/models/questions-skill-model3b.xlsx"
+Model4b="data/models/questions-skill-model4b.xlsx"
 
-## Without constraints
-## 1-> questions-skill-model1a_leak		results_questions-skill-model1a_leak_unconstrained		student-answers_1a_unconstrained
-#Results1="data/results/results_questions-skill-model1a_leak.xlsx"
-#Answers1="data/answers/student-answers_1a.xlsx"
-#java -Xmx16g -jar target/itas-1.0.jar $Model1 $Answers1 $Results1 "unconstrained" "exact"
-#
-## With constraints
-## 2 -> questions-skill-model1a_leak		results_questions-skill-model1a_leak_constrained 		student-answers_1a_constrained
-#Results2="data/results/results_questions-skill-model1a_leak_constrained.xlsx"
-#Answers2="data/answers/student-answers_1a_constrained.xlsx"
-#java -Xmx16g -jar target/itas-1.0.jar $Model1 $Answers2 $Results2 "constrained" "exact"
+# Answers
+Answers1="data/answers/student-answers_1a.xlsx"
+Answers1a="data/answers/student-answers_1a_constrained.xlsx"
+Answersb="data/answers/student-answers_b_constrained.xlsx"
 
-# 2b -> questions-skill-model1a_leak		results_questions-skill-model1a_leak_constrained_new 		student-answers_1a_constrained_new
-Results2b="data/results/results_questions-skill-model1a_leak_constrained_simple.xlsx"
-Answers2b="data/answers/student-answers_1a_constrained_simple.xlsx"
-java -Xmx16g -jar target/itas-1.0.jar $Model1 $Answers2b $Results2b "constrained" "exact"
+# Baseline: without constraints and without supplementary skills
+Results1="data/results/results_questions-skill-baseline_model.xlsx"
+java -Xmx16g -jar target/itas-1.0.jar $Model1a $Answers1 $Results1 "unconstrained" "exact"
 
-# Basic model with constraints and supplementary skills
-#Answers3="data/answers/student-answers_b_constrained.xlsx"
-Answers3b="data/answers/student-answers_b_constrained_simple.xlsx"
+# Model 1a: baseline + constraints
+Results1a="data/results/results_questions-skill-model1a.xlsx"
+java -Xmx16g -jar target/itas-1.0.jar $Model1a $Answers1a $Results1a "constrained" "exact"
 
-Model3="data/models/questions-skill-model1b_leak.xlsx"
+# Model 1b: baseline + constraints + supplementary skills
+Results1b="data/results/results_questions-skill-model1b.xlsx"
+java -Xmx16g -jar target/itas-1.0.jar $Model1b $Answersb $Results1b "constrained" "exact"
 
-## 3 -> questions-skill-model1b_leak		results_questions-skill-model1b_leak_constrained		student-answers_b_constrained
-#Results3="data/results/results_questions-skill-model1b_leak_constrained.xlsx"
-#
-#java -Xmx16g -jar target/itas-1.0.jar $Model3 $Answers3 $Results3 "constrained" "exact"
+# Model 2b: model 2 + constraints + supplementary skills
+Results2b="data/results/results_questions-skill-model2b.xlsx"
+java -Xmx16g -jar target/itas-1.0.jar $Model2b $Answersb $Results2b "constrained" "exact"
 
-# 3b -> questions-skill-model1b_leak		results_questions-skill-model1b_leak_constrained_new		student-answers_b_constrained_new
-Results3b="data/results/results_questions-skill-model1b_leak_constrained_simple.xlsx"
-java -Xmx16g -jar target/itas-1.0.jar $Model3 $Answers3b $Results3b "constrained" "exact"
+# Model 3b: model 3 + constraints + supplementary skills
+Results3b="data/results/results_questions-skill-model3b.xlsx"
+java -Xmx16g -jar target/itas-1.0.jar $Model3b $Answersb $Results3b "constrained" "exact"
 
-# More elaborated model with constraints and supplementary skills
-# 4 -> questions-skill-model2b_leak		results_questions-skill-model2b_leak_constrained		student-answers_b_constrained
-Model4="data/models/questions-skill-model2b_leak.xlsx"
-#Results4="data/results/results_questions-skill-model2b_leak_constrained.xlsx"
-#java -Xmx16g -jar target/itas-1.0.jar $Model4 $Answers3 $Results4 "constrained" "exact"
-
-# 4b -> questions-skill-model2b_leak		results_questions-skill-model2b_leak_constrained_new		student-answers_b_constrained_nww
-Results4b="data/results/results_questions-skill-model2b_leak_constrained_simple.xlsx"
-java -Xmx16g -jar target/itas-1.0.jar $Model4 $Answers3b $Results4b "constrained" "exact"
-
-# Complex model with constraints and supplementary skills
-# 5 -> questions-skill-model3b_leak		results_questions-skill-model3b_leak_constrained		student-answers_b_constrained
-Model5="data/models/questions-skill-model3b_leak.xlsx"
-#Results5="data/results/results_questions-skill-model3b_leak_constrained.xlsx"
-#java -Xmx16g -jar target/itas-1.0.jar $Model5 $Answers3 $Results5 "constrained" "exact"
-
-# 5b -> questions-skill-model3b_leak		results_questions-skill-model3b_leak_constrained_new		student-answers_b_constrained_new
-Results5b="data/results/results_questions-skill-model3b_leak_constrained_simple.xlsx"
-java -Xmx16g -jar target/itas-1.0.jar $Model5 $Answers3b $Results5b "constrained" "exact"
+# Model 4b: model 4 + constraints + supplementary skills
+Results4b="data/results/results_questions-skill-model4b.xlsx"
+java -Xmx16g -jar target/itas-1.0.jar $Model4b $Answersb $Results4b "constrained" "exact"
