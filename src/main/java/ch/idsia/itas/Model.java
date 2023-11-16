@@ -20,9 +20,8 @@ import static ch.idsia.itas.Utils.cellToInt;
 import static ch.idsia.itas.Utils.questionName;
 
 /**
- * Author:  Claudio "Dna" Bonesana
- * Project: 2022-flairs
- * Date:    09.02.2022 11:17
+ * Author name:    Giorgia Adorni
+ * Date creation:  16.11.2023
  */
 public class Model {
 
@@ -40,13 +39,17 @@ public class Model {
 	final static Set<String> OR_LEFT = new HashSet<>();
 	final static Set<String> OR_RIGHT = new HashSet<>();
 
-	final static Set<String> CT_CUBE = new HashSet<>(Arrays.asList("X11", "X12", "X13", "X21", "X22", "X23", "X31", "X32", "X33"));
+	final static Set<String> CT_CUBE = new HashSet<>(Arrays.asList("X11", "X12", "X13", "X14",
+																   "X21", "X22", "X23", "X24",
+																   "X31", "X32", "X33", "X34"));
 
 	static {
 		OR_LEFT_LEFT.add("E1");
-		for (int i = 2; i <= 7; i++)
+		// From E2 to E8
+		for (int i = 2; i <= 8; i++)
 			OR_LEFT.add("E" + i);
-		for (int i = 8; i <= 10; i++)
+		// From E9 to E14
+		for (int i = 9; i <= 14; i++)
 			OR_RIGHT.add("E" + i);
 	}
 
@@ -409,16 +412,21 @@ public class Model {
 		// Add relations between skills
 		model.addConstraint("X11", "X12");
 		model.addConstraint("X12", "X13");
+		model.addConstraint("X13", "X14");
 		model.addConstraint("X21", "X22");
 		model.addConstraint("X22", "X23");
+		model.addConstraint("X23", "X24");
 		model.addConstraint("X31", "X32");
 		model.addConstraint("X32", "X33");
+		model.addConstraint("X33", "X34");
 		model.addConstraint("X11", "X21");
 		model.addConstraint("X21", "X31");
 		model.addConstraint("X12", "X22");
 		model.addConstraint("X22", "X32");
 		model.addConstraint("X13", "X23");
 		model.addConstraint("X23", "X33");
+		model.addConstraint("X14", "X24");
+		model.addConstraint("X24", "X34");
 
 		model.assignFactors();
 

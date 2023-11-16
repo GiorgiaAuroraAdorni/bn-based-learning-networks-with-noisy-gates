@@ -19,9 +19,8 @@ import java.util.*;
 import static ch.idsia.itas.Results.results;
 
 /**
- * Author:  Claudio "Dna" Bonesana
- * Project: 2022-flairs
- * Date:    09.02.2022 10:06
+ * Author name:    Giorgia Adorni
+ * Date creation:  16.11.2023
  */
 public class Main {
 
@@ -180,11 +179,11 @@ public class Main {
 		final double avgTime = timeSpan / studentCount;
 
 		String text = ", " + timeSpan + "\n";
-		String filename = "data/model_statistics.txt";
+		String filename = "data/model_statistics_virtual.txt";
 
 		Writer output;
 		output = new BufferedWriter(new FileWriter(filename, true));
-		output.append(filenameResults.replace(".xlsx", "").replace("data/results/results_questions-skill-", "")).append(text);
+		output.append(filenameResults.replace(".xlsx", "").replace("data/results/virtual/results_questions-skill-", "")).append(text);
 		output.close();
 
  		System.out.printf("Completed in %.3f seconds (average: %.3f seconds)%n", timeSpan, avgTime);
