@@ -7,7 +7,7 @@ authors:
 - family-names: "Bonesana"
   given-names: "Claudio"
   orcid: "https://orcid.org/0000-0001-7633-5024"
-title: "bn-based-learning-networks-with-noisy-gates"
+title: "BN-based Learning Networks with Noisy Gates"
 version: 1.0.0
 doi: 10.5281/zenodo.10958613
 date-released: 2024-04-11
