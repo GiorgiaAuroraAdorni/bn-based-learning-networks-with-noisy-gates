@@ -17,6 +17,7 @@ import java.nio.file.Paths;
 import java.util.*;
 
 import static ch.idsia.itas.Results.results;
+import static ch.idsia.itas.Utils.*;
 
 /**
  * Author name:    Giorgia Adorni
@@ -80,8 +81,51 @@ public class Main {
 		if (!sts.isEmpty())
 			System.out.println("Limited to ids:     " + sts);
 
+		// available schemas: fixed number of 12
+		final int nSchemas = 12;
+
 		// available skills
 		final int[] skills = model.skillIds();
+
+		// available questions
+		final Set<String> questions = model.questionIds;
+
+//		// Convert the set to an array
+//		String[] questionArray = questions.toArray(new String[0]);
+//
+//		// Verify that the array is not empty
+//		if (questionArray.length > 0) {
+//			// Print the first element of the array and its value
+//			String firstQuestionId = questionArray[0];
+//			System.out.println("First element in questions: " + firstQuestionId);
+//		}
+
+		// Define two lists to hold the desired values
+		List<String> observedQuestions = new ArrayList<>();
+		List<String> inferenceQuestions = new ArrayList<>();
+
+		// Iterate through the set of questions
+		for (String question : questions) {
+			// Split the question value based on the "_" character
+			String[] parts = question.split("_");
+			// Extract the block number (1-12)
+			int block = Integer.parseInt(parts[0]);
+			// Extract the question number (1-26)
+			// int questionNumber = Integer.parseInt(parts[1]);
+
+			// Check if the question belongs to the first 8 blocks
+			if (block >= 1 && block <= 8) {
+				observedQuestions.add(question);
+			} else {
+				inferenceQuestions.add(question);
+			}
+		}
+
+		// Convert the lists to arrays
+		String[] observedQuestionsArray = observedQuestions.toArray(new String[0]);
+		String[] inferenceQuestionsArray = inferenceQuestions.toArray(new String[0]);
+
+		// TODO: modify the observedQuestionsArray and inferenceQuestionsArray so that there are random permutations of the schemas
 
 		// inference engine
 		final LoopyBeliefPropagation<BayesianFactor> infLBP;
@@ -117,11 +161,15 @@ public class Main {
 			if (model.hasLeak)
 				obs.put(model.leakVar, 1);
 
+//			TODO: modificare s:
+//			 obs: risposte da osservare: modifica obs
+//			 skills: risposte su cui fare inferenza/da prevedere
 			List<BayesianFactor> test_qs = Arrays.stream(skills).mapToObj(s -> infVE.query(model.model, obs, s)).toList();
 			final double[] test_outs = test_qs.stream().map(x -> x.getValue(1)).mapToDouble(x -> x).toArray();
 			System.out.printf("%3d: %s%n", student.id, Arrays.toString(test_outs));
 
 			student.answers.forEach((q, answer) -> {
+				// TODO: controllo per vedere se la variabile é nella lista o no
 				if (!model.questionIds.contains(q))
 					// we have questions not supported by the model: we skip them
 					return;
@@ -140,6 +188,7 @@ public class Main {
 					List<BayesianFactor> qs;
 
 					if (exactInference) {
+						// TODO: le skills diventano larray di risoposte su cui fare inferenza
 						qs = Arrays.stream(skills).mapToObj(s -> infVE.query(model.model, obs, s)).toList();
 					} else {
 						qs = infLBP.query(model.model, obs, skills);
@@ -151,6 +200,8 @@ public class Main {
 						ans.put(skl, res);
 					}
 
+//					TODO: nuovo file con probabilita di yes/no per ogni skill piu quella vera (threshold per considerarla vera?)
+//					cross entropy
 					student.resultsPerQuestion.put(q, ans);
 					System.out.printf("%3d: %s, %s%n", student.id, q, ans);
 				}
