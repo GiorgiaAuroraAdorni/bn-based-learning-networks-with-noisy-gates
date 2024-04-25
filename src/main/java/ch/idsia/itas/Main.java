@@ -89,20 +89,13 @@ public class Main {
 
 		// available questions
 		final Set<String> questions = model.questionIds;
-
-//		// Convert the set to an array
-//		String[] questionArray = questions.toArray(new String[0]);
-//
-//		// Verify that the array is not empty
-//		if (questionArray.length > 0) {
-//			// Print the first element of the array and its value
-//			String firstQuestionId = questionArray[0];
-//			System.out.println("First element in questions: " + firstQuestionId);
-//		}
+		final int[] questionsIds = model.questionIds.stream().mapToInt(model.nameToIdx::get).toArray();
 
 		// Define two lists to hold the desired values
 		List<String> observedQuestions = new ArrayList<>();
 		List<String> inferenceQuestions = new ArrayList<>();
+		List<Integer> observedQuestionsIds = new ArrayList<>();
+		List<Integer> inferenceQuestionsIds = new ArrayList<>();
 
 		// Iterate through the set of questions
 		for (String question : questions) {
@@ -116,14 +109,22 @@ public class Main {
 			// Check if the question belongs to the first 8 blocks
 			if (block >= 1 && block <= 8) {
 				observedQuestions.add(question);
+				// Get the index of the question
+				int questionIndex = model.nameToIdx.get(question);
+				observedQuestionsIds.add(questionIndex);
 			} else {
 				inferenceQuestions.add(question);
+				// Get the index of the question
+				int questionIndex = model.nameToIdx.get(question);
+				inferenceQuestionsIds.add(questionIndex);
 			}
 		}
 
 		// Convert the lists to arrays
 		String[] observedQuestionsArray = observedQuestions.toArray(new String[0]);
 		String[] inferenceQuestionsArray = inferenceQuestions.toArray(new String[0]);
+		int[] observedQuestionsIdsArray = observedQuestionsIds.stream().mapToInt(i -> i).toArray();
+		int[] inferenceQuestionsIdsArray = inferenceQuestionsIds.stream().mapToInt(i -> i).toArray();
 
 		// TODO: modify the observedQuestionsArray and inferenceQuestionsArray so that there are random permutations of the schemas
 
