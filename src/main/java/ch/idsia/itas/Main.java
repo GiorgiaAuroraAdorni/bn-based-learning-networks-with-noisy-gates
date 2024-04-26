@@ -152,25 +152,24 @@ public class Main {
 
 			studentCount ++;
 
-			final TIntIntHashMap obs = new TIntIntHashMap();
+			final TIntIntHashMap obsObserved = new TIntIntHashMap();
 			// add constraints variables
 			if (hasConstraint)
 				for (Integer constraint : model.constraints)
-					obs.put(constraint, 1);
+					obsObserved.put(constraint, 1);
 
 			// in case of a leak variable, observe it
 			if (model.hasLeak)
-				obs.put(model.leakVar, 1);
+				obsObserved.put(model.leakVar, 1);
 
-//			TODO: modificare s:
-//			 obs: risposte da osservare: modifica obs
-//			 skills: risposte su cui fare inferenza/da prevedere
-			List<BayesianFactor> test_qs = Arrays.stream(skills).mapToObj(s -> infVE.query(model.model, obs, s)).toList();
-			final double[] test_outs = test_qs.stream().map(x -> x.getValue(1)).mapToDouble(x -> x).toArray();
-			System.out.printf("%3d: %s%n", student.id, Arrays.toString(test_outs));
+			final TIntIntHashMap obsInference = new TIntIntHashMap();
+			// TODO: add constraints variables (?)
+
+//			List<BayesianFactor> test_qs = Arrays.stream(inferenceQuestionsIdsArray).mapToObj(iq -> infVE.query(model.model, obsObserved, iq)).toList();
+//			final double[] test_outs = test_qs.stream().map(x -> x.getValue(1)).mapToDouble(x -> x).toArray();
+//			System.out.printf("%3d: %s%n", student.id, Arrays.toString(test_outs));
 
 			student.answers.forEach((q, answer) -> {
-				// TODO: controllo per vedere se la variabile é nella lista o no
 				if (!model.questionIds.contains(q))
 					// we have questions not supported by the model: we skip them
 					return;
@@ -178,31 +177,38 @@ public class Main {
 				// answers can be yes (1), no (0), empty (no evidence)
 				if (!answer.isEmpty()) {
 					final int i = model.nameToIdx.get(q);
-					if (answer.equals("yes"))
-						obs.put(i, 1);
-					if (answer.equals("no"))
-						obs.put(i, 0);
+					// When creating obs, differentiate between obsObserved and obsInference, comparing q with observedQuestionsArray and inferenceQuestionsArray
+					if (Arrays.asList(observedQuestionsArray).contains(q)) {
+						if (answer.equals("yes"))
+							obsObserved.put(i, 1);
+						if (answer.equals("no"))
+							obsObserved.put(i, 0);
+						// FIXME: not sure if we need this, probably not
+					} else if (Arrays.asList(inferenceQuestionsArray).contains(q)) {
+						if (answer.equals("yes"))
+							obsInference.put(i, 1);
+						if (answer.equals("no"))
+							obsInference.put(i, 0);
+					}
 				}
 
 				if (!sts.isEmpty()) {
-					final Map<Model.Skill, BayesianFactor> ans = new LinkedHashMap<>();
+					final Map<String, BayesianFactor> ans = new LinkedHashMap<>();
 					List<BayesianFactor> qs;
 
 					if (exactInference) {
-						// TODO: le skills diventano larray di risoposte su cui fare inferenza
-						qs = Arrays.stream(skills).mapToObj(s -> infVE.query(model.model, obs, s)).toList();
+						qs = Arrays.stream(inferenceQuestionsIdsArray).mapToObj(iq -> infVE.query(model.model, obsObserved, iq)).toList();
 					} else {
-						qs = infLBP.query(model.model, obs, skills);
+						qs = infLBP.query(model.model, obsObserved, inferenceQuestionsIdsArray);
 					}
 
 					for (int i = 0; i < qs.size(); i++) {
-						final Model.Skill skl = model.skills.get(i);
+						final String iq = inferenceQuestionsArray[i];
 						final BayesianFactor res = qs.get(i);
-						ans.put(skl, res);
+						ans.put(iq, res);
 					}
 
-//					TODO: nuovo file con probabilita di yes/no per ogni skill piu quella vera (threshold per considerarla vera?)
-//					cross entropy
+					// cross entropy
 					student.resultsPerQuestion.put(q, ans);
 					System.out.printf("%3d: %s, %s%n", student.id, q, ans);
 				}
@@ -211,13 +217,13 @@ public class Main {
 			List<BayesianFactor> query;
 
 			if (exactInference) {
-				query = Arrays.stream(skills).mapToObj(s -> infVE.query(model.model, obs, s)).toList();
+				query = Arrays.stream(inferenceQuestionsIdsArray).mapToObj(iq -> infVE.query(model.model, obsObserved, iq)).toList();
 			} else {
-				query = infLBP.query(model.model, obs, skills);
+				query = infLBP.query(model.model, obsObserved, inferenceQuestionsIdsArray);
 			}
 
 			for (int i = 0; i < query.size(); i++)
-				student.results.put(model.skills.get(i), query.get(i));
+				student.results.put(inferenceQuestionsArray[i], query.get(i));
 
 			final double[] outs = query.stream().map(x -> x.getValue(1)).mapToDouble(x -> x).toArray();
 			System.out.printf("%3d: %s%n", student.id, Arrays.toString(outs));
@@ -225,6 +231,8 @@ public class Main {
 
 		if (studentCount == 0)
 			studentCount = 1;
+
+		// TODO: nuovo file con probabilita di yes/no per ogni skill piu quella vera (threshold per considerarla vera?)
 
 		final long endTime = System.currentTimeMillis();
 		final double timeSpan = (endTime - startTime) / 1000.0;
