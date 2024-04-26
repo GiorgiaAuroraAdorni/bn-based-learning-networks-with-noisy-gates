@@ -17,7 +17,6 @@ import java.nio.file.Paths;
 import java.util.*;
 
 import static ch.idsia.itas.Results.results;
-import static ch.idsia.itas.Utils.*;
 
 /**
  * Author name:    Giorgia Adorni
@@ -38,17 +37,9 @@ public class Main {
 		final boolean hasConstraint;
 		final boolean exactInference;
 
-		if (strConstraint.equals("constrained")) {
-			hasConstraint = true;
-		} else {
-			hasConstraint = false;
-		}
+        hasConstraint = strConstraint.equals("constrained");
 
-		if (strInference.equals("exact")) {
-			exactInference = true;
-		} else {
-			exactInference = false;
-		}
+        exactInference = strInference.equals("exact");
 
 		final Set<Integer> sts = new HashSet<>(); // 1, 11, 12
 		if (args.length > 5)
@@ -82,14 +73,14 @@ public class Main {
 			System.out.println("Limited to ids:     " + sts);
 
 		// available schemas: fixed number of 12
-		final int nSchemas = 12;
+		// final int nSchemas = 12;
 
 		// available skills
-		final int[] skills = model.skillIds();
+//		final int[] skills = model.skillIds();
 
 		// available questions
 		final Set<String> questions = model.questionIds;
-		final int[] questionsIds = model.questionIds.stream().mapToInt(model.nameToIdx::get).toArray();
+		// final int[] questionsIds = model.questionIds.stream().mapToInt(model.nameToIdx::get).toArray();
 
 		// Define two lists to hold the desired values
 		List<String> observedQuestions = new ArrayList<>();
@@ -123,7 +114,6 @@ public class Main {
 		// Convert the lists to arrays
 		String[] observedQuestionsArray = observedQuestions.toArray(new String[0]);
 		String[] inferenceQuestionsArray = inferenceQuestions.toArray(new String[0]);
-		int[] observedQuestionsIdsArray = observedQuestionsIds.stream().mapToInt(i -> i).toArray();
 		int[] inferenceQuestionsIdsArray = inferenceQuestionsIds.stream().mapToInt(i -> i).toArray();
 
 		// TODO: modify the observedQuestionsArray and inferenceQuestionsArray so that there are random permutations of the schemas
