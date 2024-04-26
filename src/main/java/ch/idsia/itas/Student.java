@@ -32,8 +32,8 @@ public class Student {
 	final int id;
 	final Map<String, String> answers = new LinkedHashMap<>();
 
-	final Map<Model.Skill, BayesianFactor> results = new LinkedHashMap<>();
-	final Map<String, Map<Model.Skill, BayesianFactor>> resultsPerQuestion = new LinkedHashMap<>();
+	final Map<String, BayesianFactor> results = new LinkedHashMap<String, BayesianFactor>();
+	final Map<String, Map<String, BayesianFactor>> resultsPerQuestion = new LinkedHashMap<String, Map<String, BayesianFactor>>();
 
 	public Student(int id) {
 		this.id = id;

@@ -136,7 +136,7 @@ public class Results {
 
 					for (Model.Skill skill : model.skills) {
 						cell = row.createCell(j++);
-						final Map<Model.Skill, BayesianFactor> map = student.resultsPerQuestion.get(k);
+						final Map<String, BayesianFactor> map = student.resultsPerQuestion.get(k);
 						if (map.containsKey(skill))
 							cell.setCellValue(map.get(skill).getValue(1));
 						cell.setCellStyle(df);
