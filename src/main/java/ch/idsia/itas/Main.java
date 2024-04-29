@@ -76,7 +76,7 @@ public class Main {
 		// final int nSchemas = 12;
 
 		// available skills
-//		final int[] skills = model.skillIds();
+		final int[] skills = model.skillIds();
 
 		// available questions
 		final Set<String> questions = model.questionIds;
@@ -95,7 +95,7 @@ public class Main {
 			// Extract the block number (1-12)
 			int block = Integer.parseInt(parts[0]);
 			// Extract the question number (1-26)
-			// int questionNumber = Integer.parseInt(parts[1]);
+			 int questionNumber = Integer.parseInt(parts[1]);
 
 			// Check if the question belongs to the first 8 blocks
 			if (block >= 1 && block <= 8) {
@@ -114,6 +114,7 @@ public class Main {
 		// Convert the lists to arrays
 		String[] observedQuestionsArray = observedQuestions.toArray(new String[0]);
 		String[] inferenceQuestionsArray = inferenceQuestions.toArray(new String[0]);
+//		int[] observedQuestionsIdsArray = observedQuestionsIds.stream().mapToInt(i -> i).toArray();
 		int[] inferenceQuestionsIdsArray = inferenceQuestionsIds.stream().mapToInt(i -> i).toArray();
 
 		// TODO: modify the observedQuestionsArray and inferenceQuestionsArray so that there are random permutations of the schemas
@@ -152,36 +153,49 @@ public class Main {
 			if (model.hasLeak)
 				obsObserved.put(model.leakVar, 1);
 
-			final TIntIntHashMap obsInference = new TIntIntHashMap();
+//			final TIntIntHashMap obsInference = new TIntIntHashMap();
 			// TODO: add constraints variables (?)
 
 //			List<BayesianFactor> test_qs = Arrays.stream(inferenceQuestionsIdsArray).mapToObj(iq -> infVE.query(model.model, obsObserved, iq)).toList();
 //			final double[] test_outs = test_qs.stream().map(x -> x.getValue(1)).mapToDouble(x -> x).toArray();
 //			System.out.printf("%3d: %s%n", student.id, Arrays.toString(test_outs));
 
+
 			student.answers.forEach((q, answer) -> {
 				if (!model.questionIds.contains(q))
 					// we have questions not supported by the model: we skip them
 					return;
 
+				// iterate only over the answers related to the questions observed, if it is not in the list, skip it
+				if (!Arrays.asList(observedQuestionsArray).contains(q))
+					return;
+
 				// answers can be yes (1), no (0), empty (no evidence)
 				if (!answer.isEmpty()) {
 					final int i = model.nameToIdx.get(q);
-					// When creating obs, differentiate between obsObserved and obsInference, comparing q with observedQuestionsArray and inferenceQuestionsArray
+					// When creating obs, differentiate between obsObserved and obsInference,
+					// if q is in observedQuestionsArray, put it in obsObserved
 					if (Arrays.asList(observedQuestionsArray).contains(q)) {
-						if (answer.equals("yes"))
+						// differentiate between yes, no, and empty
+						if (answer.equals("yes")) {
 							obsObserved.put(i, 1);
-						if (answer.equals("no"))
+						}
+						if (answer.equals("no")) {
 							obsObserved.put(i, 0);
-						// FIXME: not sure if we need this, probably not
-					} else if (Arrays.asList(inferenceQuestionsArray).contains(q)) {
-						if (answer.equals("yes"))
-							obsInference.put(i, 1);
-						if (answer.equals("no"))
-							obsInference.put(i, 0);
+						}
+					// TODO: probably this is not needed
 					}
+//					if (Arrays.asList(inferenceQuestionsArray).contains(q)) {
+//						// differentiate between yes, no, and empty
+//						if (answer.equals("yes")) {
+//							obsInference.put(i, 1);
+//						}
+//						if (answer.equals("no")) {
+//							obsInference.put(i, 0);
+//						}
+//					}
 				}
-
+				// Otherwise put it in obsInference
 				if (!sts.isEmpty()) {
 					final Map<String, BayesianFactor> ans = new LinkedHashMap<>();
 					List<BayesianFactor> qs;
