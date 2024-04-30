@@ -84,18 +84,19 @@ public class AnswersResults {
 			// Sort question IDs
 			List<String> sortedQuestionIds = new ArrayList<>(model.questionIds);
 			Collections.sort(sortedQuestionIds, (id1, id2) -> {
-                String[] parts1 = id1.split("_");
-                String[] parts2 = id2.split("_");
-                int x1 = Integer.parseInt(parts1[0]);
-                int y1 = Integer.parseInt(parts1[1]);
-                int x2 = Integer.parseInt(parts2[0]);
-                int y2 = Integer.parseInt(parts2[1]);
-                if (x1 != x2) {
-                    return Integer.compare(x1, x2);
-                } else {
-                    return Integer.compare(y1, y2);
-                }
-            });
+				String[] parts1 = id1.split("_");
+				String[] parts2 = id2.split("_");
+				int x1 = Integer.parseInt(parts1[0]);
+				int y1 = Integer.parseInt(parts1[1]);
+				int x2 = Integer.parseInt(parts2[0]);
+				int y2 = Integer.parseInt(parts2[1]);
+				if (x1 != x2) {
+					return Integer.compare(x1, x2);
+				} else {
+					return Integer.compare(y1, y2);
+				}
+			});
+
 
 			// Add header for each sorted question ID
 			for (String questionId : sortedQuestionIds) {
