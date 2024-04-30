@@ -22,7 +22,7 @@ import static ch.idsia.itas.Results.results;
  * Author name:    Giorgia Adorni
  * Date creation:  16.11.2023
  */
-public class Main {
+public class MainAnswersPredictor {
 
 
 	public static void main(String[] args) throws IOException {
@@ -98,7 +98,8 @@ public class Main {
 			 int questionNumber = Integer.parseInt(parts[1]);
 
 			// Check if the question belongs to the first 8 blocks
-			if (block >= 1 && block <= 8) {
+			if (block == 1 && questionNumber == 1) {
+//			if (block >= 1 && block <= 8) {
 				observedQuestions.add(question);
 				// Get the index of the question
 				int questionIndex = model.nameToIdx.get(question);
@@ -212,8 +213,8 @@ public class Main {
 						ans.put(iq, res);
 					}
 
-					// cross entropy
-					student.resultsPerQuestion.put(q, ans);
+					// TODO: cross entropy
+					student.resultsAnswersPerQuestion.put(q, ans);
 					System.out.printf("%3d: %s, %s%n", student.id, q, ans);
 				}
 			});
@@ -227,7 +228,7 @@ public class Main {
 			}
 
 			for (int i = 0; i < query.size(); i++)
-				student.results.put(inferenceQuestionsArray[i], query.get(i));
+				student.resultsAnswers.put(inferenceQuestionsArray[i], query.get(i));
 
 			final double[] outs = query.stream().map(x -> x.getValue(1)).mapToDouble(x -> x).toArray();
 			System.out.printf("%3d: %s%n", student.id, Arrays.toString(outs));
@@ -236,7 +237,7 @@ public class Main {
 		if (studentCount == 0)
 			studentCount = 1;
 
-		// TODO: nuovo file con probabilita di yes/no per ogni skill piu quella vera (threshold per considerarla vera?)
+		// TODO: nuovo file con probabilità di yes/no per ogni skill piu quella vera (threshold per considerarla vera?)
 
 		final long endTime = System.currentTimeMillis();
 		final double timeSpan = (endTime - startTime) / 1000.0;
@@ -252,7 +253,7 @@ public class Main {
 
  		System.out.printf("Completed in %.3f seconds (average: %.3f seconds)%n", timeSpan, avgTime);
 
-		results(model, students, resultsXLSX, questionsSkillsXLSX);
+		results(model, students, resultsXLSX, studentAnswersXLSX);
 
 		System.out.println("Results saved to file " + resultsXLSX);
 	}
