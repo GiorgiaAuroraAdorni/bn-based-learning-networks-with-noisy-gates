@@ -16,7 +16,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
-import static ch.idsia.itas.Results.results;
+import static ch.idsia.itas.AnswersResults.answersResults;
 
 /**
  * Author name:    Giorgia Adorni
@@ -253,7 +253,7 @@ public class MainAnswersPredictor {
 
  		System.out.printf("Completed in %.3f seconds (average: %.3f seconds)%n", timeSpan, avgTime);
 
-		results(model, students, resultsXLSX, studentAnswersXLSX);
+		answersResults(model, students, resultsXLSX, studentAnswersXLSX);
 
 		System.out.println("Results saved to file " + resultsXLSX);
 	}
