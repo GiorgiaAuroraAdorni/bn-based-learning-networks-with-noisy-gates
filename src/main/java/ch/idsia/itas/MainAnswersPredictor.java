@@ -72,15 +72,8 @@ public class MainAnswersPredictor {
 		if (!sts.isEmpty())
 			System.out.println("Limited to ids:     " + sts);
 
-		// available schemas: fixed number of 12
-		// final int nSchemas = 12;
-
-		// available skills
-		final int[] skills = model.skillIds();
-
 		// available questions
 		final Set<String> questions = model.questionIds;
-		// final int[] questionsIds = model.questionIds.stream().mapToInt(model.nameToIdx::get).toArray();
 
 		// Define two lists to hold the desired values
 		List<String> observedQuestions = new ArrayList<>();
@@ -88,6 +81,7 @@ public class MainAnswersPredictor {
 		List<Integer> observedQuestionsIds = new ArrayList<>();
 		List<Integer> inferenceQuestionsIds = new ArrayList<>();
 
+		// TODO: modify the observedQuestionsArray and inferenceQuestionsArray so that there are random permutations of the schemas
 		// Iterate through the set of questions
 		for (String question : questions) {
 			// Split the question value based on the "_" character
@@ -115,10 +109,7 @@ public class MainAnswersPredictor {
 		// Convert the lists to arrays
 		String[] observedQuestionsArray = observedQuestions.toArray(new String[0]);
 		String[] inferenceQuestionsArray = inferenceQuestions.toArray(new String[0]);
-//		int[] observedQuestionsIdsArray = observedQuestionsIds.stream().mapToInt(i -> i).toArray();
 		int[] inferenceQuestionsIdsArray = inferenceQuestionsIds.stream().mapToInt(i -> i).toArray();
-
-		// TODO: modify the observedQuestionsArray and inferenceQuestionsArray so that there are random permutations of the schemas
 
 		// inference engine
 		final LoopyBeliefPropagation<BayesianFactor> infLBP;
@@ -157,11 +148,6 @@ public class MainAnswersPredictor {
 //			final TIntIntHashMap obsInference = new TIntIntHashMap();
 			// TODO: add constraints variables (?)
 
-//			List<BayesianFactor> test_qs = Arrays.stream(inferenceQuestionsIdsArray).mapToObj(iq -> infVE.query(model.model, obsObserved, iq)).toList();
-//			final double[] test_outs = test_qs.stream().map(x -> x.getValue(1)).mapToDouble(x -> x).toArray();
-//			System.out.printf("%3d: %s%n", student.id, Arrays.toString(test_outs));
-
-
 			student.answers.forEach((q, answer) -> {
 				if (!model.questionIds.contains(q))
 					// we have questions not supported by the model: we skip them
@@ -184,17 +170,8 @@ public class MainAnswersPredictor {
 						if (answer.equals("no")) {
 							obsObserved.put(i, 0);
 						}
-					// TODO: probably this is not needed
 					}
-//					if (Arrays.asList(inferenceQuestionsArray).contains(q)) {
-//						// differentiate between yes, no, and empty
-//						if (answer.equals("yes")) {
-//							obsInference.put(i, 1);
-//						}
-//						if (answer.equals("no")) {
-//							obsInference.put(i, 0);
-//						}
-//					}
+
 				}
 				// Otherwise put it in obsInference
 				if (!sts.isEmpty()) {
