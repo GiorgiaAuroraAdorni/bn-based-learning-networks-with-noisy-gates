@@ -10,8 +10,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Author:  Giorgia Adorni
@@ -32,76 +31,116 @@ public class AnswersResults {
 			final Sheet source = template.getSheetAt(0);
 
 			// header rows
-			Row headerRow = sheet.createRow(0);
-			headerRow.createCell(0).setCellValue("Question_ID");
-			headerRow.createCell(1).setCellValue("Sub_Question_ID");
-			headerRow.createCell(2).setCellValue("Question_Text");
+			sheet.createRow(0);
+			sheet.createRow(1);
 
-			for (int i = 0; i < students.size(); i++) {
-				headerRow.createCell(i + 3).setCellValue("Student_" + (i + 1));
-			}
-
-			// styles used for header
+			// styles used for header col0
 			final CellStyle styleHeader = workbook.createCellStyle();
 			styleHeader.cloneStyleFrom(source.getRow(0).getCell(0).getCellStyle());
 
-			// applying style to header
-			for (Cell cell : headerRow) {
-				cell.setCellStyle(styleHeader);
+			// cell "Student_ID"
+			final Cell cellId = sheet.getRow(0).createCell(0);
+			cellId.setCellValue("Student_ID");
+			cellId.setCellStyle(styleHeader);
+
+			final CellRangeAddress rId = new CellRangeAddress(0, 1, 0, 0);
+			sheet.addMergedRegion(rId);
+			RegionUtil.setBorderBottom(BorderStyle.THIN, rId, sheet);
+			RegionUtil.setBorderRight(BorderStyle.THIN, rId, sheet);
+
+			// cell "Question_ID"
+			final Cell cellQid = sheet.getRow(0).createCell(1);
+			cellQid.setCellValue("Question_ID");
+			cellQid.setCellStyle(styleHeader);
+
+			final CellRangeAddress rQid = new CellRangeAddress(0, 1, 1, 1);
+			sheet.addMergedRegion(rQid);
+			RegionUtil.setBorderBottom(BorderStyle.THIN, rQid, sheet);
+			RegionUtil.setBorderRight(BorderStyle.THIN, rQid, sheet);
+
+			// cell "Sub_Question_ID"
+			final Cell cellSqid = sheet.getRow(0).createCell(2);
+			cellSqid.setCellValue("Sub_Question_ID");
+			cellSqid.setCellStyle(styleHeader);
+
+			final CellRangeAddress rSqid = new CellRangeAddress(0, 1, 2, 2);
+			sheet.addMergedRegion(rSqid);
+			RegionUtil.setBorderBottom(BorderStyle.THIN, rSqid, sheet);
+			RegionUtil.setBorderRight(BorderStyle.THIN, rSqid, sheet);
+
+			// cell "Answer"
+			final Cell cellAnswer = sheet.getRow(0).createCell(3);
+			cellAnswer.setCellValue("Answer");
+			cellAnswer.setCellStyle(styleHeader);
+
+			final CellRangeAddress rAns = new CellRangeAddress(0, 1, 3, 3);
+			sheet.addMergedRegion(rAns);
+			RegionUtil.setBorderBottom(BorderStyle.THIN, rAns, sheet);
+			RegionUtil.setBorderRight(BorderStyle.THIN, rAns, sheet);
+
+			Map<String, Integer> questionIdColumnIndexMap = new HashMap<>();
+			int columnIndex = 4; // Index of the column after existing columns
+
+			// Sort question IDs
+			List<String> sortedQuestionIds = new ArrayList<>(model.questionIds);
+			Collections.sort(sortedQuestionIds, (id1, id2) -> {
+                String[] parts1 = id1.split("_");
+                String[] parts2 = id2.split("_");
+                int x1 = Integer.parseInt(parts1[0]);
+                int y1 = Integer.parseInt(parts1[1]);
+                int x2 = Integer.parseInt(parts2[0]);
+                int y2 = Integer.parseInt(parts2[1]);
+                if (x1 != x2) {
+                    return Integer.compare(x1, x2);
+                } else {
+                    return Integer.compare(y1, y2);
+                }
+            });
+
+			// Add header for each sorted question ID
+			for (String questionId : sortedQuestionIds) {
+				Cell headerCell = sheet.getRow(0).createCell(columnIndex);
+				headerCell.setCellValue(questionId);
+				questionIdColumnIndexMap.put(questionId, columnIndex); // Map question ID to column index
+				columnIndex++;
 			}
 
-			// merging cells for header
-			for (int i = 0; i < 3; i++) {
-				final CellRangeAddress mergedRegion = new CellRangeAddress(0, 1, i, i);
-				sheet.addMergedRegion(mergedRegion);
-				RegionUtil.setBorderBottom(BorderStyle.THIN, mergedRegion, sheet);
-				RegionUtil.setBorderRight(BorderStyle.THIN, mergedRegion, sheet);
-			}
+			// Format for data
+			final DataFormat format = workbook.createDataFormat();
+			final CellStyle df = workbook.createCellStyle();
+			final short f = format.getFormat("0.00");
+			df.setDataFormat(f);
 
-			for (int i = 0, l = 0; i < students.size(); i++) {
-				final Student student = students.get(i);
-				Row row;
-				int j;
-				Cell cell;
+			// Insert student answers
+			int rowIndex = HEADER_ROWS;
+			for (Student student : students) {
+				for (String k : student.resultsAnswersPerQuestion.keySet()) {
+					Row row = sheet.createRow(rowIndex);
+					String[] ks = k.split("_");
+					int qid = Integer.parseInt(ks[0]);
+					int sqid = Integer.parseInt(ks[1]);
+					row.createCell(0).setCellValue(student.id);
+					row.createCell(1).setCellValue(qid);
+					row.createCell(2).setCellValue(sqid);
+					row.createCell(3).setCellValue(student.answers.get(k));
 
-				// Ciclo attraverso le domande e le sottodomande del modello
-				for (Question question : model.questions.filter()) {
-					for (SubQuestion subQuestion : question.subQuestions.filter()) {
-						row = sheet.createRow(HEADER_ROWS + (l++));
-						j = 0;
-						// Inserisci l'ID dello studente
-						cell = row.createCell(j++);
-						cell.setCellValue(student.id);
-
-						// Inserisci l'ID della domanda
-						cell = row.createCell(j++);
-						cell.setCellValue(question.id);
-
-						// Inserisci l'ID della sottodomanda
-						cell = row.createCell(j++);
-						cell.setCellValue(subQuestion.id);
-
-						// Inserisci la risposta dello studente (se necessario)
-						cell = row.createCell(j++);
-						String answerKey = question.id + "_" + subQuestion.id;
-						cell.setCellValue(student.answers.getOrDefault(answerKey, ""));
-
-						// Inserisci i valori di probabilità dal campo student.results
-						Map<String, BayesianFactor> studentResults = student.resultsAnswersPerQuestion.get(answerKey);
-						if (studentResults != null) {
-							for (BayesianFactor results : studentResults.values()) {
-								for (BayesianFactor result : results.filter()) {
-									cell = row.createCell(j++);
-									cell.setCellValue(result.getValue(1));
-									cell.setCellStyle(df); // Se necessario
-								}
-							}
+					// Insert probabilities for each question ID
+					for (String questionId : sortedQuestionIds) {
+						Cell cell = row.createCell(questionIdColumnIndexMap.get(questionId));
+						Map<String, BayesianFactor> probabilities = student.resultsAnswersPerQuestion.get(k);
+						if (probabilities.containsKey(questionId)) {
+							BayesianFactor probability = probabilities.get(questionId);
+							cell.setCellValue(probability.getValue(1));
+						} else {
+							cell.setCellValue(""); // Leave cell empty if no associated probability
 						}
+						cell.setCellStyle(df);
 					}
+					rowIndex++;
 				}
 			}
 
-		workbook.write(fos);
+			workbook.write(fos);
 		}
 	}
 }
