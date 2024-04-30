@@ -18,11 +18,11 @@ import java.util.Map;
  * Project: 2022-flairs
  * Date:    09.02.2022 14:54
  */
-public class Results {
+public class SkillsResults {
 
 	static final int HEADER_ROWS = 2;
 
-	public static void results(Model model, List<Student> students, Path output, Path input) throws IOException {
+	public static void skillsResults(Model model, List<Student> students, Path output, Path input) throws IOException {
 
 		try (
 				final FileOutputStream fos = new FileOutputStream(output.toFile());
@@ -115,7 +115,7 @@ public class Results {
 				Cell cell;
 
 				// student answers
-				for (String k : student.resultsPerQuestion.keySet()) {
+				for (String k : student.resultsSkillsPerQuestion.keySet()) {
 					row = sheet.createRow(HEADER_ROWS + (l++));
 					j = 0;
 					cell = row.createCell(j++);
@@ -136,7 +136,7 @@ public class Results {
 
 					for (Model.Skill skill : model.skills) {
 						cell = row.createCell(j++);
-						final Map<String, BayesianFactor> map = student.resultsPerQuestion.get(k);
+						final Map<Model.Skill, BayesianFactor> map = student.resultsSkillsPerQuestion.get(k);
 						if (map.containsKey(skill))
 							cell.setCellValue(map.get(skill).getValue(1));
 						cell.setCellStyle(df);
@@ -153,8 +153,8 @@ public class Results {
 				// student skills
 				for (Model.Skill skill : model.skills) {
 					cell = row.createCell(j++);
-					if (student.results.containsKey(skill))
-						cell.setCellValue(student.results.get(skill).getValue(1));
+					if (student.resultsSkills.containsKey(skill))
+						cell.setCellValue(student.resultsSkills.get(skill).getValue(1));
 					cell.setCellStyle(df);
 				}
 			}
