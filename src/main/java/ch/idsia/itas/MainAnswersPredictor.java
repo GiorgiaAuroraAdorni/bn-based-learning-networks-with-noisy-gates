@@ -8,10 +8,7 @@ import ch.idsia.crema.inference.ve.order.MinFillOrdering;
 import ch.idsia.crema.model.graphical.GraphicalModel;
 import gnu.trove.map.hash.TIntIntHashMap;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Writer;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -36,7 +33,6 @@ public class MainAnswersPredictor {
                                               String[] inferenceQuestionsArray, boolean hasConstraint,
                                               LoopyBeliefPropagation<BayesianFactor> infLBP,
                                               InferenceJoined<GraphicalModel<BayesianFactor>, BayesianFactor> infVE) {
-        // Existing code for processing student's answers...
 
         final TIntIntHashMap obsObserved = new TIntIntHashMap();
         // add constraints variables
@@ -162,7 +158,7 @@ public class MainAnswersPredictor {
         final Set<String> questions = model.questionIds;
 
         // Define the file path for saving combinations
-        Path filePath = Paths.get("data/results/virtual/combinations.txt");
+        Path filePath = Paths.get("data/results/virtual/combinations.csv");
 
         // Define the number of blocks
         int numBlocks = 12;
@@ -171,25 +167,23 @@ public class MainAnswersPredictor {
         // Define the number of inference blocks
         int numInferenceBlocks = 4;
 
-        // Define two lists to hold the desired values
-        List<String> observedQuestions = new ArrayList<>();
-        List<String> inferenceQuestions = new ArrayList<>();
-        List<Integer> observedQuestionsIds = new ArrayList<>();
-        List<Integer> inferenceQuestionsIds = new ArrayList<>();
-
         // Create a list to store combinations
         List<String> combinations = new ArrayList<>();
 
         // Check if the file already contains combinations
         if (Files.exists(filePath)) {
-            try {
-                combinations = Files.readAllLines(filePath);
+            try (BufferedReader reader = Files.newBufferedReader(filePath)) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    combinations.add(line);
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
         } else {
             // Generate new combinations for each student
             for (Student student : students) {
+                StringBuilder combination = new StringBuilder();
                 Set<Integer> observedBlocks = new HashSet<>();
                 Set<Integer> inferenceBlocks = new HashSet<>();
 
@@ -208,38 +202,78 @@ public class MainAnswersPredictor {
                     }
                 }
 
-                // Create combination string
-                String combination = "Observed: " + observedBlocks + ", Inference: " + inferenceBlocks;
-
-                // Add combination to the list
-                combinations.add(combination);
-
-                // Convert blocks to questions and IDs
+                // Append observed questions to the combination string
                 for (int block : observedBlocks) {
-                    for (int questionNumber = 1; questionNumber <= 2; questionNumber++) {
-                        String question = block + "_" + questionNumber;
-                        observedQuestions.add(question);
-                        observedQuestionsIds.add(model.nameToIdx.get(question));
+                    combination.append(block).append(",");
+                }
+
+                // Append inference questions to the combination string
+                for (int block : inferenceBlocks) {
+                    combination.append(block);
+                    if (inferenceBlocks.size() > 1) {
+                        combination.append(",");
                     }
                 }
 
-                for (int block : inferenceBlocks) {
-                    for (int questionNumber = 1; questionNumber <= 2; questionNumber++) {
-                        String question = block + "_" + questionNumber;
-                        inferenceQuestions.add(question);
-                        inferenceQuestionsIds.add(model.nameToIdx.get(question));
-                    }
-                }
+                combinations.add(student.id + "," + combination.toString());
             }
 
             // Save combinations to file
             try (BufferedWriter writer = Files.newBufferedWriter(filePath)) {
+                // Write header row
+                writer.write("Student,Observed1,Observed2,Observed3,Observed4,Observed5,Observed6,Observed7,Observed8,Inference1,Inference2,Inference3,Inference4");
+                writer.newLine();
+
+                // Write student combinations
                 for (String combination : combinations) {
                     writer.write(combination);
                     writer.newLine();
                 }
             } catch (IOException e) {
                 e.printStackTrace();
+            }
+        }
+
+        // Parse the combinations
+        List<String> observedQuestions = new ArrayList<>();
+        List<String> inferenceQuestions = new ArrayList<>();
+        List<Integer> observedQuestionsIds = new ArrayList<>();
+        List<Integer> inferenceQuestionsIds = new ArrayList<>();
+
+        // Iterate over combinations, skipping the header
+        for (int i = 1; i < combinations.size(); i++) {
+            String combination = combinations.get(i);
+            String[] parts = combination.split(",");
+            // The observed blocks are the first 8 parts
+            int[] observedBlocks = Arrays.stream(parts).limit(numObservedBlocks).mapToInt(Integer::parseInt).toArray();
+            // The inference blocks are the last 4 parts
+            int[] inferenceBlocks = Arrays.stream(parts).skip(numObservedBlocks).mapToInt(Integer::parseInt).toArray();
+
+            // Iterate over all questions
+            for (String question : questions) {
+                // Split the question value based on the "_" character
+                String[] questionParts = question.split("_");
+                // Extract the block number (1-12)
+                int block = Integer.parseInt(questionParts[0]);
+                // Extract the question number (1-26)
+                int questionNumber = Integer.parseInt(questionParts[1]);
+
+                // Check if the block is in observedBlocks
+                if (Arrays.stream(observedBlocks).anyMatch(b -> b == block)) {
+                    // Add the question to observedQuestions
+                    observedQuestions.add(question);
+                    // Get the index of the question
+                    int questionIndex = model.nameToIdx.get(question);
+                    // Add the question index to observedQuestionsIds
+                    observedQuestionsIds.add(questionIndex);
+                } else if (Arrays.stream(inferenceBlocks).anyMatch(b -> b == block)) {
+                    // Add the question to inferenceQuestions
+                    inferenceQuestions.add(question);
+                    // Get the index of the question
+                    int questionIndex = model.nameToIdx.get(question);
+                    // Add the question index to inferenceQuestionsIds
+                    inferenceQuestionsIds.add(questionIndex);
+                }
             }
         }
 
