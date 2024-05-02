@@ -12,6 +12,7 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -46,10 +47,6 @@ public class MainAnswersPredictor {
         // in case of a leak variable, observe it
         if (model.hasLeak)
             obsObserved.put(model.leakVar, 1);
-
-        //	final TIntIntHashMap obsInference = new TIntIntHashMap();
-
-        // TODO: add constraints variables (?)
 
         student.answers.forEach((q, answer) -> {
             if (!model.questionIds.contains(q))
@@ -154,7 +151,7 @@ public class MainAnswersPredictor {
         System.out.println("- leak node: " + model.hasLeak);
 
         // students parsing
-        final List<Student> students = Student.parse(studentAnswersXLSX);
+        List<Student> students = Student.parse(studentAnswersXLSX);
 
         System.out.println("Found " + students.size() + " students");
 
@@ -164,34 +161,85 @@ public class MainAnswersPredictor {
         // available questions
         final Set<String> questions = model.questionIds;
 
+        // Define the file path for saving combinations
+        Path filePath = Paths.get("data/results/virtual/combinations.txt");
+
+        // Define the number of blocks
+        int numBlocks = 12;
+        // Define the number of observed blocks
+        int numObservedBlocks = 8;
+        // Define the number of inference blocks
+        int numInferenceBlocks = 4;
+
         // Define two lists to hold the desired values
         List<String> observedQuestions = new ArrayList<>();
         List<String> inferenceQuestions = new ArrayList<>();
         List<Integer> observedQuestionsIds = new ArrayList<>();
         List<Integer> inferenceQuestionsIds = new ArrayList<>();
 
-        // TODO: modify the following block of code so that observedQuestionsArray and inferenceQuestionsArray are random permutations of the schemas and not just the sorted sequence of schemas
-        // Iterate through the set of questions
-        for (String question : questions) {
-            // Split the question value based on the "_" character
-            String[] parts = question.split("_");
-            // Extract the block number (1-12)
-            int block = Integer.parseInt(parts[0]);
-            // Extract the question number (1-26)
-            int questionNumber = Integer.parseInt(parts[1]);
+        // Create a list to store combinations
+        List<String> combinations = new ArrayList<>();
 
-            // Check if the question belongs to the first 8 blocks
-//			do it only for block 1 and 2 and questions 1 and 2
-            if (block <= 2 && questionNumber <= 2) {
-                observedQuestions.add(question);
-                // Get the index of the question
-                int questionIndex = model.nameToIdx.get(question);
-                observedQuestionsIds.add(questionIndex);
-            } else {
-                inferenceQuestions.add(question);
-                // Get the index of the question
-                int questionIndex = model.nameToIdx.get(question);
-                inferenceQuestionsIds.add(questionIndex);
+        // Check if the file already contains combinations
+        if (Files.exists(filePath)) {
+            try {
+                combinations = Files.readAllLines(filePath);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            // Generate new combinations for each student
+            for (Student student : students) {
+                Set<Integer> observedBlocks = new HashSet<>();
+                Set<Integer> inferenceBlocks = new HashSet<>();
+
+                // Randomly select observed blocks
+                while (observedBlocks.size() < numObservedBlocks) {
+                    int block = (int) (Math.random() * numBlocks) + 1;
+                    observedBlocks.add(block);
+                }
+
+                // Randomly select inference blocks
+                while (inferenceBlocks.size() < numInferenceBlocks) {
+                    int block = (int) (Math.random() * numBlocks) + 1;
+                    // Check if the block is not already selected as observed
+                    if (!observedBlocks.contains(block)) {
+                        inferenceBlocks.add(block);
+                    }
+                }
+
+                // Create combination string
+                String combination = "Observed: " + observedBlocks + ", Inference: " + inferenceBlocks;
+
+                // Add combination to the list
+                combinations.add(combination);
+
+                // Convert blocks to questions and IDs
+                for (int block : observedBlocks) {
+                    for (int questionNumber = 1; questionNumber <= 2; questionNumber++) {
+                        String question = block + "_" + questionNumber;
+                        observedQuestions.add(question);
+                        observedQuestionsIds.add(model.nameToIdx.get(question));
+                    }
+                }
+
+                for (int block : inferenceBlocks) {
+                    for (int questionNumber = 1; questionNumber <= 2; questionNumber++) {
+                        String question = block + "_" + questionNumber;
+                        inferenceQuestions.add(question);
+                        inferenceQuestionsIds.add(model.nameToIdx.get(question));
+                    }
+                }
+            }
+
+            // Save combinations to file
+            try (BufferedWriter writer = Files.newBufferedWriter(filePath)) {
+                for (String combination : combinations) {
+                    writer.write(combination);
+                    writer.newLine();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
 
@@ -225,44 +273,45 @@ public class MainAnswersPredictor {
         // Create a fixed-size thread pool
         ExecutorService executor = Executors.newFixedThreadPool(numThreads);
 
-		// FIXME: For test purposes,
+        // FIXME: For test purposes, run just for 10 students
+        students = students.subList(0, 10);
         for (Student student : students) {
-			if (!sts.isEmpty() && !sts.contains(student.id))
-				continue;
+            if (!sts.isEmpty() && !sts.contains(student.id))
+                continue;
 
-			executor.submit(() -> processStudentAnswers(student, sts, model, exactInference, observedQuestionsArray, inferenceQuestionsIdsArray, inferenceQuestionsArray, hasConstraint, infLBP, infVE));
-		}
+            executor.submit(() -> processStudentAnswers(student, sts, model, exactInference, observedQuestionsArray, inferenceQuestionsIdsArray, inferenceQuestionsArray, hasConstraint, infLBP, infVE));
+        }
 
-		// Shutdown the executor to indicate that no more tasks will be submitted
-		executor.shutdown();
-		try {
-			executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-		} catch (InterruptedException e) {
-			System.err.println("Error waiting for executor to terminate: " + e.getMessage());
-			Thread.currentThread().interrupt();
-		}
+        // Shutdown the executor to indicate that no more tasks will be submitted
+        executor.shutdown();
+        try {
+            executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        } catch (InterruptedException e) {
+            System.err.println("Error waiting for executor to terminate: " + e.getMessage());
+            Thread.currentThread().interrupt();
+        }
 
-		if (studentCount == 0)
-			studentCount = 1;
+        if (studentCount == 0)
+            studentCount = 1;
 
-		// TODO: nuovo file con probabilità di yes/no per ogni skill piu quella vera (threshold per considerarla vera?)
+        // TODO: nuovo file con probabilità di yes/no per ogni skill piu quella vera (threshold per considerarla vera?)
 
-		final long endTime = System.currentTimeMillis();
-		final double timeSpan = (endTime - startTime) / 1000.0;
-		final double avgTime = timeSpan / studentCount;
+        final long endTime = System.currentTimeMillis();
+        final double timeSpan = (endTime - startTime) / 1000.0;
+        final double avgTime = timeSpan / studentCount;
 
-		String text = ", " + timeSpan + "\n";
-		String filename = "data/model_statistics_virtual.txt";
+        String text = ", " + timeSpan + "\n";
+        String filename = "data/model_statistics_virtual.txt";
 
-		Writer output;
-		output = new BufferedWriter(new FileWriter(filename, true));
-		output.append(filenameResults.replace(".xlsx", "").replace("data/results/virtual/results_questions-skill-", "")).append(text);
-		output.close();
+        Writer output;
+        output = new BufferedWriter(new FileWriter(filename, true));
+        output.append(filenameResults.replace(".xlsx", "").replace("data/results/virtual/results_questions-skill-", "")).append(text);
+        output.close();
 
-		System.out.printf("Completed in %.3f seconds (average: %.3f seconds)%n", timeSpan, avgTime);
+        System.out.printf("Completed in %.3f seconds (average: %.3f seconds)%n", timeSpan, avgTime);
 
-		answersResults(model, students, resultsXLSX, studentAnswersXLSX);
+        answersResults(model, students, resultsXLSX, studentAnswersXLSX);
 
-		System.out.println("Results saved to file " + resultsXLSX);
+        System.out.println("Results saved to file " + resultsXLSX);
     }
 }
