@@ -139,6 +139,20 @@ public class AnswersResults {
 					}
 					rowIndex++;
 				}
+
+				// Writing results for each answer
+				int j = 4;
+				Row rowAnswers = sheet.createRow(rowIndex);
+				rowAnswers.createCell(0).setCellValue(student.id);
+				rowIndex++;
+
+				for (String answerQuestion : student.resultsAnswers.keySet()) {
+					BayesianFactor probability = student.resultsAnswers.get(answerQuestion);
+					int column = questionIdColumnIndexMap.get(answerQuestion);
+					Cell cell = rowAnswers.createCell(column);
+					cell.setCellValue(probability.getValue(1));
+					cell.setCellStyle(df);
+				}
 			}
 
 			workbook.write(fos);
