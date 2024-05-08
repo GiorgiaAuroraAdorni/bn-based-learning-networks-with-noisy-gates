@@ -307,7 +307,8 @@ public class MainAnswersPredictor {
         ExecutorService executor = Executors.newFixedThreadPool(numThreads);
 
         // FIXME: For test purposes, run just for 10 students
-        students = students.subList(0, 10);
+        // students = students.subList(0, 10);  // TODO: comment and uncomment this line
+
         for (Student student : students) {
             if (!sts.isEmpty() && !sts.contains(student.id))
                 continue;
