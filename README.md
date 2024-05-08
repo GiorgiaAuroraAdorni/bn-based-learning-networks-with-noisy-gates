@@ -1,20 +1,66 @@
-# Intelligent Tutoring Assessment System for CAT
+# Intelligent Tutoring Assessment System for the CAT
 
-This software requires Java 11 or later. Download the latest release and follow one of the two methods below to execute the experiments.
+## Cloning the Repository
+
+To get started, clone the repository to your local machine by running the following command in your terminal:
+
+```bash
+git clone https://github.com/GiorgiaAuroraAdorni/bn-based-learning-networks-with-noisy-gates.git
+```
+
+## Installation Instructions
+
+### Maven
+
+Ensure you have Maven installed on your system. You can install Maven by running the following command in your terminal:
+
+```bash
+sudo apt update
+sudo apt install maven
+```
+
+After installation, you can verify that Maven is installed by running:
+
+```bash
+mvn -version
+```
+### Java
+
+Ensure you have Java 11 or later installed on your system. You can install OpenJDK 11 by running:
+
+```bash
+sudo apt update
+sudo apt install openjdk-11-jdk
+```
+
+After installation, you can verify that Java is installed by running:
+
+```bash
+java -version
+```
 
 ## Method 1: Using Command Line
 
 Run the following command in your terminal:
 
 ```
-java -jar 2022-flairs-*.jar "questions-skill.xlsx" "students-answers.xlsx" "results.xlsx"
+java -jar target/itas-1.0.jar "questions-skill.xlsx" "students-answers.xlsx" "results.xlsx" "constrained" "exact"
 ```
+
+In the command above, replace "questions-skill.xlsx", "students-answers.xlsx", and "results.xlsx" with the paths to the appropriate XLSX files containing your questions, students' answers, and the file where you want to save the results, respectively.
+
+Note: It's recommended to use one of the provided XLSX files or your own files following the same format.
+
+The last two parameters, "constrained" and "exact", determine the mode of operation of the Intelligent Tutoring Assessment System (ITAS):
+
+- Constrained Mode: In this mode, the assessment process is constrained, meaning that it strictly follows the rules and criteria defined for evaluating the students' answers. This mode typically provides more precise but potentially stricter evaluation results.
+- Exact Mode: In this mode, the assessment process aims for exact inference, meaning that it tries to precisely determine the correctness of each answer based on the defined criteria. This mode may require more computational resources but can provide more accurate assessment results.
 
 Change the content of the XLSX files to test for other models, questions, and answers.
 
 ## Method 2: Using script.sh
 
-Alternatively, you can use the provided `script.sh` to execute the experiments using Maven. Open your terminal and navigate to the root directory of the project, then run the following commands:
+Alternatively, you can use one of the provided `.sh` files to execute the experiments using Maven. Open your terminal and navigate to the root directory of the project, then run the following commands:
 
 ```
 chmod +x script.sh
@@ -26,19 +72,15 @@ This method automates the process and includes predefined models and answers.
 You can edit the script if you want to modify the models or answers file accordingly.
 
 ## Available Models and Answers
-The `script.sh` file includes the following predefined models and answers:
+The "data" directory contains the following structure of files and folders:
 
-- Model1a
-- Model1b
-- Model2b
-- Model3b
-- Model4b
+- **answers**: This directory contains Excel files with student answers. Navigate to the appropriate subdirectory (`unplugged` or `virtual`) to find the files. You can modify these files with your preferred spreadsheet editor.
 
-You can find these models in the `data/models/` directory, and the corresponding answers in the `data/answers/` directory.
+- **models**: Inside this directory, you'll find Excel files representing the models used in the experiments. Navigate to the appropriate subdirectory (`unplugged` or `virtual`) to find the files. You can modify these files with your preferred spreadsheet editor.
+
+- **results**: This directory contains Excel files with the output results of the experiments. Navigate to the appropriate subdirectory (`unplugged` or `virtual`) to find the files. You can modify these files with your preferred spreadsheet editor.
+
+Remember to navigate to the correct subdirectory (`unplugged` or `virtual`) depending on whether you're working with unplugged or virtual data.
 
 ## Experiment Results
 The experiment results will be saved in the `data/results/` directory with filenames matching the respective models.
-
-Note: Before running the experiments, please make sure that you have Java 11 or later installed, and if using Method 2, that Maven is properly set up on your system.
-
-Feel free to reach out if you have any questions or need further assistance.
