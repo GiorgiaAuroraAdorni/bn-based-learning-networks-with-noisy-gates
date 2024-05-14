@@ -30,7 +30,7 @@ Ensure you have Java 11 or later installed on your system. You can install OpenJ
 
 ```bash
 sudo apt update
-sudo apt install openjdk-11-jdk
+sudo apt install openjdk-18-jdk
 ```
 
 After installation, you can verify that Java is installed by running:
@@ -39,6 +39,13 @@ After installation, you can verify that Java is installed by running:
 java -version
 ```
 
+### Tested Environment
+
+The code in this repository has been tested with the following versions:
+
+- Java: 18
+- Maven: 3.6.3
+  
 ## Method 1: Using Command Line
 
 Run the following command in your terminal:
