@@ -98,6 +98,7 @@ public class MainAnswersPredictor {
                 student.resultsAnswersPerQuestion.put(q, ans);
                 System.out.printf("%3d: %s, %s%n", student.id, q, ans);
             }
+            scheduler.shutdown();
         });
 
         List<BayesianFactor> query;
@@ -311,6 +312,8 @@ public class MainAnswersPredictor {
 
         // Define the number of threads for parallel execution
         int numThreads = Runtime.getRuntime().availableProcessors(); // Use available processors
+
+        System.out.println("Number of threads: " + numThreads);
 
         // Create a fixed-size thread pool
         ExecutorService executor = Executors.newFixedThreadPool(numThreads);
