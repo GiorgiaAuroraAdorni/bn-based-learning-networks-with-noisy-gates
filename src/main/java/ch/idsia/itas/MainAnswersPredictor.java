@@ -312,6 +312,9 @@ public class MainAnswersPredictor {
 
         System.out.println("Number of threads: " + numThreads);
 
+        // Print the current time
+        System.out.println("Start time: " + new Date());
+
         // Create a fixed-size thread pool
         ExecutorService executor = Executors.newFixedThreadPool(numThreads);
 
