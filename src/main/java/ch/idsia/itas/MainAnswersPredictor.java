@@ -15,7 +15,6 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import static ch.idsia.itas.AnswersResults.answersResults;
@@ -33,14 +32,6 @@ public class MainAnswersPredictor {
                                               String[] inferenceQuestionsArray, boolean hasConstraint,
                                               LoopyBeliefPropagation<BayesianFactor> infLBP,
                                               InferenceJoined<GraphicalModel<BayesianFactor>, BayesianFactor> infVE) {
-
-        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-
-        // Schedule the task to print student ID every hour
-        scheduler.scheduleAtFixedRate(() -> {
-            // Assuming you have a variable holding the current student ID
-            System.out.println("Current student ID: " + student.id);
-        }, 0, 1, TimeUnit.MINUTES); // Run every minute
 
         final TIntIntHashMap obsObserved = new TIntIntHashMap();
         // add constraints variables
@@ -94,11 +85,21 @@ public class MainAnswersPredictor {
                     ans.put(iq, res);
                 }
 
+                // Schedule task to print answer every 5 minutes
+                Timer timer = new Timer();
+                timer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        // Print student's answer
+                        System.out.printf("%3d: %s, %s%n", student.id, q, ans);
+                    }
+                }, 0, 5 * 60 * 1000); // Run every 5 minutes (5 * 60 * 1000 milliseconds)
+
+
                 // TODO: cross entropy
                 student.resultsAnswersPerQuestion.put(q, ans);
                 System.out.printf("%3d: %s, %s%n", student.id, q, ans);
             }
-            scheduler.shutdown();
         });
 
         List<BayesianFactor> query;
