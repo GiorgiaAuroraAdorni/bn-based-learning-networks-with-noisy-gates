@@ -312,8 +312,9 @@ public class MainAnswersPredictor {
 
         System.out.println("Number of threads: " + numThreads);
 
-        // Print the current time
-        System.out.println("Start time: " + new Date());
+        // Print the current date
+        Date initialDate = new Date();
+        System.out.println("Current time: " + initialDate);
 
         // Create a fixed-size thread pool
         ExecutorService executor = Executors.newFixedThreadPool(numThreads);
@@ -365,5 +366,12 @@ public class MainAnswersPredictor {
         answersResults(model, students, resultsXLSX, studentAnswersXLSX);
 
         System.out.println("Results saved to file " + resultsXLSX);
+
+        // Print the current date
+        Date finalDate = new Date();
+        System.out.println("Current time: " + finalDate);
+
+        // Print the duration of the program
+        System.out.println("Duration: " + (endTime - startTime) + " milliseconds");
     }
 }
