@@ -15,6 +15,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import static ch.idsia.itas.AnswersResults.answersResults;
@@ -32,6 +33,14 @@ public class MainAnswersPredictor {
                                               String[] inferenceQuestionsArray, boolean hasConstraint,
                                               LoopyBeliefPropagation<BayesianFactor> infLBP,
                                               InferenceJoined<GraphicalModel<BayesianFactor>, BayesianFactor> infVE) {
+
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
+        // Schedule the task to print student ID every hour
+        scheduler.scheduleAtFixedRate(() -> {
+            // Assuming you have a variable holding the current student ID
+            System.out.println("Current student ID: " + student.id);
+        }, 0, 1, TimeUnit.MINUTES); // Run every minute
 
         final TIntIntHashMap obsObserved = new TIntIntHashMap();
         // add constraints variables
