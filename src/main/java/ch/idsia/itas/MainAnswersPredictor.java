@@ -26,13 +26,13 @@ import static ch.idsia.itas.AnswersResults.answersResults;
  */
 public class MainAnswersPredictor {
 
-
     // Method to process a student's answers
     private static void processStudentAnswers(Student student, Set<Integer> sts, Model model, boolean exactInference,
                                               String[] observedQuestionsArray, int[] inferenceQuestionsIdsArray,
                                               String[] inferenceQuestionsArray, boolean hasConstraint,
                                               LoopyBeliefPropagation<BayesianFactor> infLBP,
-                                              InferenceJoined<GraphicalModel<BayesianFactor>, BayesianFactor> infVE) {
+                                              InferenceJoined<GraphicalModel<BayesianFactor>, BayesianFactor> infVE,
+                                              ScheduledExecutorService scheduler) {
 
         final TIntIntHashMap obsObserved = new TIntIntHashMap();
         // add constraints variables
@@ -86,8 +86,6 @@ public class MainAnswersPredictor {
                     ans.put(iq, res);
                 }
 
-                // Schedule task to print answer every 5 minutes
-                ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
                 scheduler.scheduleAtFixedRate(() -> {
                     // Print student's answer
                     System.out.printf("%3d: %s, %s%n", student.id, q, ans);
@@ -320,12 +318,18 @@ public class MainAnswersPredictor {
         // FIXME: For test purposes, run just for 10 students
         // students = students.subList(0, 10);  // TODO: comment and uncomment this line
 
+        // Schedule task to print answer every 5 minutes
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
         for (Student student : students) {
             if (!sts.isEmpty() && !sts.contains(student.id))
                 continue;
 
-            executor.submit(() -> processStudentAnswers(student, sts, model, exactInference, observedQuestionsArray, inferenceQuestionsIdsArray, inferenceQuestionsArray, hasConstraint, infLBP, infVE));
+            executor.submit(() -> processStudentAnswers(student, sts, model, exactInference, observedQuestionsArray,
+                    inferenceQuestionsIdsArray, inferenceQuestionsArray, hasConstraint, infLBP, infVE, scheduler));
         }
+
+        scheduler.shutdown();
 
         // Shutdown the executor to indicate that no more tasks will be submitted
         executor.shutdown();
