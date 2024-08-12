@@ -1,5 +1,22 @@
 # Intelligent Tutoring Assessment System for the CAT
 
+### Citation
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10958613.svg)](https://doi.org/10.5281/zenodo.10958613)
+
+If you use the materials provided in this repository, please cite the following work:
+
+```bibtex
+   @misc{Adorni_BN-based_Learning_Networks_2024,
+     author = {Adorni, Giorgia and Bonesana, Claudio},
+     doi = {10.5281/zenodo.10958613},
+     month = apr,
+     title = {{BN-based Learning Networks with Noisy Gates}},
+     note = {Zenodo Software. \url{https://doi.org/10.5281/zenodo.10958613}},
+     version = {1.0.0},
+     year = {2024}
+   }
+```
+
 ## Cloning the Repository
 
 To get started, clone the repository to your local machine by running the following command in your terminal:
